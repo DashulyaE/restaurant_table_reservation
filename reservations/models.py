@@ -13,6 +13,12 @@ class Restaurant(models.Model):
     photo = models.ImageField(
         upload_to="restaurant/photo", verbose_name="Фото ресторана", help_text="Загрузите фото ресторана"
     )
+    seating_plan_image = models.ImageField(
+        upload_to="seating_plans/photo",
+        verbose_name="План рассадки",
+        help_text="Загрузите план рассадки",
+        default="seating_plans/photo/default.jpg",
+    )
 
     class Meta:
         verbose_name = "Ресторан"
@@ -26,10 +32,15 @@ class Restaurant(models.Model):
 class Table(models.Model):
     """Модель класса стол"""
 
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="tables")
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name="tables",
+        verbose_name="Ресторан",
+        help_text="Выбрать ресторан",
+    )
     number = models.CharField(max_length=50, verbose_name="Номер стола", help_text="Укажите номер стола")
-    size = models.PositiveIntegerField(help_text="Количество мест за столиком")
-    location = models.CharField(max_length=255, blank=True, null=True)
+    size = models.PositiveIntegerField(verbose_name="Кол-во мест", help_text="Количество мест за столиком")
 
     class Meta:
         verbose_name = "Стол"
@@ -43,20 +54,24 @@ class Table(models.Model):
 class Reservation(models.Model):
     """Модель класса резерв"""
 
-    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="reservations")
-    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name="reservations")
+    restaurant = models.ForeignKey(
+        Restaurant, on_delete=models.CASCADE, verbose_name="Ресторан", related_name="reservations"
+    )
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, verbose_name="Номер стола", related_name="reservations")
     customer_name = models.CharField(max_length=255, verbose_name="Имя клиента")
     telephone = models.CharField(max_length=255, verbose_name="Телефон клиента")
-    number_of_guests = models.PositiveIntegerField(help_text="Количество гостей")
-    reservation_date = models.DateField(help_text="Дата брони")
-    reservation_start = models.TimeField(help_text="Время начала брони")
-    reservation_and = models.TimeField(help_text="Время окончания брони")
+    number_of_guests = models.PositiveIntegerField(help_text="Количество гостей", verbose_name="Количество гостей")
+    reservation_date = models.DateField(help_text="Дата брони", verbose_name="Дата брони")
+    reservation_start = models.TimeField(help_text="Время начала брони", verbose_name="Время начала брони")
+    reservation_and = models.TimeField(help_text="Время окончания брони", verbose_name="Время окончания брони")
     status_choices = [
         ("confirmed", "Подтверждено"),
         ("cancelled", "Отменено"),
         ("pending", "В ожидании"),
     ]
-    status = models.CharField(max_length=20, choices=status_choices, default="pending", help_text="Статус брони")
+    status = models.CharField(
+        max_length=20, choices=status_choices, default="pending", help_text="Статус брони", verbose_name="Статус брони"
+    )
 
     class Meta:
         verbose_name = "Бронь>"

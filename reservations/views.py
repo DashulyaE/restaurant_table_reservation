@@ -1,5 +1,9 @@
 from django.shortcuts import render
 
+from reservations.models import Restaurant
 
-def index(request):
-    return render(request, "base.html")
+
+def restaurants_list(request):
+    restaurants = Restaurant.objects.all()
+    context = {"restaurants": restaurants}
+    return render(request, "reservations/base.html", context)
