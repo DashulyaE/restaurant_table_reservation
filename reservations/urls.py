@@ -4,6 +4,4 @@ from reservations.views import index
 
 app_name = ReservationsConfig.name
 
-urlpatterns = [
-    path('', index)
-]
+urlpatterns = [path("", index)]
