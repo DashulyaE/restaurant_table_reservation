@@ -1,0 +1,25 @@
+:root {
+  --bs-primary: #a67b5b; /* теплый коричневый, кофе с молоком */
+  --bs-secondary: #d2b48c; /* светлый бежевый, молочный кофе */
+  --bs-success: #8b5e3c; /* насыщенный коричневый */
+  --bs-info: #c19a6b; /* светлый карамельный */
+  --bs-warning: #b38b6d; /* теплый светлый коричневый */
+  --bs-danger: #8b5e3c; /* насыщенный коричневый */
+  --bs-light: #f5deb3; /* светлый бежевый, молочный кофе */
+  --bs-dark: #4b2e2e; /* темный коричневый, кофе с молоком */
+  --bs-body-bg: #f0e2d0; /* мягкий бежево-коричневый фон */
+  --bs-body-color: #3e2f2f; /* темный коричневый для текста */
+}
+
+/* Основной цвет кнопок */
+.btn-outline-primary {
+  --bs-btn-color: #4b2e2e; /* цвет текста */
+  --bs-btn-border-color: #4b2e2e; /* цвет границы */
+}
+
+/* Полностью переопределить стиль при наведении */
+.btn-outline-primary:hover {
+  background-color: #8b5e3c !important;
+  border-color: #8b5e3c !important;
+  color: #fff !important;
+}
