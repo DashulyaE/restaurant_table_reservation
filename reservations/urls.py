@@ -4,7 +4,8 @@ from django.urls import path, include
 from config import settings
 from reservations.apps import ReservationsConfig
 from reservations.views import RestaurantListView, RestaurantDetailView, RestaurantCreateView, RestaurantUpdateView, \
-    RestaurantDeleteView, TableListView, TableDetailView, TableCreateView, TableUpdateView, TableDeleteView
+    RestaurantDeleteView, TableListView, TableDetailView, TableCreateView, TableUpdateView, TableDeleteView, \
+    ReservationListView, ReservationDetailView, ReservationCreateView
 
 app_name = ReservationsConfig.name
 
@@ -20,4 +21,8 @@ urlpatterns = [
     path("tables/create", TableCreateView.as_view(), name='table_create'),
     path("tables/<int:pk>/update/", TableUpdateView.as_view(), name='table_update'),
     path("tables/<int:pk>/delete/", TableDeleteView.as_view(), name='table_delete'),
+
+    path("reservation/", ReservationListView.as_view(), name='reservation_list'),
+    path("reservation/<int:pk>/", ReservationDetailView.as_view(), name='reservation_detail'),
+    path("reservation/create", ReservationCreateView.as_view(), name='reservation_create'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

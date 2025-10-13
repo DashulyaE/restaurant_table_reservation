@@ -1,8 +1,9 @@
+from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
-from reservations.forms import RestaurantForm, TableForm
-from reservations.models import Restaurant, Table
+from reservations.forms import RestaurantForm, TableForm, ReservationForm
+from reservations.models import Restaurant, Table, Reservation
 
 
 class RestaurantListView(ListView):
@@ -61,3 +62,42 @@ class TableDeleteView(DeleteView):
     model = Table
     success_url = reverse_lazy('reservations:table_list')
     template_name = 'reservations/table_confirm_delete.html'
+
+
+class ReservationListView(ListView):
+    model = Reservation
+
+
+class ReservationDetailView(DetailView):
+    model = Reservation
+
+
+class ReservationCreateView(CreateView):
+    model = Reservation
+    form_class = ReservationForm
+    success_url = reverse_lazy('reservations:reservation_list')
+
+    def get_initial(self):
+        initial = super().get_initial()
+        restaurant_id = self.request.GET.get('restaurant')
+        if restaurant_id:
+            initial['restaurant'] = restaurant_id
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        restaurant_id = self.request.GET.get('restaurant')
+        if restaurant_id:
+            try:
+                restaurant = Restaurant.objects.get(pk=restaurant_id)
+                context['restaurant_name'] = restaurant.name
+            except Restaurant.DoesNotExist:
+                context['restaurant_name'] = ''
+        else:
+            context['restaurant_name'] = ''
+        return context
+
+# class ReservationCreateView(CreateView):
+#     model = Reservation
+#     form_class = ReservationForm
+#     success_url = reverse_lazy('reservations:reservation_list')
