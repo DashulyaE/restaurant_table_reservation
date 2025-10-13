@@ -97,6 +97,13 @@ class ReservationCreateView(CreateView):
             context['restaurant_name'] = ''
         return context
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        restaurant_id = self.request.GET.get('restaurant')
+        if restaurant_id:
+            kwargs['restaurant_id'] = restaurant_id
+        return kwargs
+
 # class ReservationCreateView(CreateView):
 #     model = Reservation
 #     form_class = ReservationForm

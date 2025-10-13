@@ -28,7 +28,15 @@ class TableForm(StyleFormMixin, ModelForm):
         fields = '__all__'
 
 
-class ReservationForm(StyleFormMixin, ModelForm):
+class ReservationForm(ModelForm):
     class Meta:
         model = Reservation
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        restaurant_id = kwargs.pop('restaurant_id', None)
+        super().__init__(*args, **kwargs)
+        if restaurant_id:
+            self.fields['table'].queryset = Table.objects.filter(restaurant_id=restaurant_id)
+        else:
+            self.fields['table'].queryset = Table.objects.none()
