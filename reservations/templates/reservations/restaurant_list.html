@@ -1,7 +1,7 @@
 {% extends 'reservations/base.html' %}
 {% block content %}
 <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
-  {% for restaurant in restaurants %}
+  {% for restaurant in object_list %}
   <div class="col d-flex align-items-stretch">
     <div class="card mb-4 rounded-3 shadow-sm w-100 d-flex flex-column">
       <div class="card-header py-3">
@@ -15,10 +15,18 @@
         <ul class="list-unstyled mt-3 mb-4 flex-fill">
           <li>{{restaurant.description|truncatechars:100}}</li>
         </ul>
-        <div class="d-flex gap-2">
-          <a href="{% url 'reservations:restaurants_detail' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Узнать о ресторане</a>
-          <a href="#" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
-        </div>
+        <ul>
+          <div class="d-flex gap-2">
+            <a href="{% url 'reservations:restaurant_detail' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Узнать о ресторане</a>
+            <a href="#" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
+          </div>
+        </ul>
+        <ul>
+          <div class="d-flex gap-2">
+            <a href="{% url 'reservations:restaurant_update' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Редактировать</a>
+            <a href="{% url 'reservations:restaurant_delete' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Удалить</a>
+          </div>
+        </ul>
       </div>
     </div>
   </div>

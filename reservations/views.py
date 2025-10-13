@@ -1,15 +1,33 @@
-from django.shortcuts import render
+from django.urls import reverse_lazy, reverse
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from reservations.models import Restaurant
 
 
-def restaurants_list(request):
-    restaurants = Restaurant.objects.all()
-    context = {"restaurants": restaurants}
-    return render(request, "reservations/restaurant_list.html", context)
+class RestaurantListView(ListView):
+    model = Restaurant
 
 
-def restaurants_detail(request, pk):
-    restaurant = Restaurant.objects.get(pk=pk)
-    context = {"restaurant": restaurant}
-    return render(request, "reservations/restaurants_detail.html", context)
+class RestaurantDetailView(DetailView):
+    model = Restaurant
+
+
+class RestaurantCreateView(CreateView):
+    model = Restaurant
+    fields = '__all__'
+    success_url = reverse_lazy('reservations:restaurants_list')
+
+
+class RestaurantUpdateView(UpdateView):
+    model = Restaurant
+    fields = '__all__'
+    success_url = reverse_lazy('reservations:restaurants_list')
+
+    def get_success_url(self):
+        return reverse('reservations:restaurant_detail', args=[self.kwargs.get('pk')])
+
+
+class RestaurantDeleteView(DeleteView):
+    model = Restaurant
+    success_url = reverse_lazy('reservations:restaurants_list')
+    template_name = 'reservations/restaurant_confirm_delete.html'
