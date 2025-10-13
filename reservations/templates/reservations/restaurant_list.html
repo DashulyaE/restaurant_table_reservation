@@ -15,7 +15,10 @@
         <ul class="list-unstyled mt-3 mb-4 flex-fill">
           <li>{{restaurant.description|truncatechars:100}}</li>
         </ul>
-        <button type="button" class="w-100 btn btn-lg btn-outline-primary mt-auto">Sign up for free</button>
+        <div class="d-flex gap-2">
+          <a href="{% url 'reservations:restaurants_detail' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Узнать о ресторане</a>
+          <a href="#" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
+        </div>
       </div>
     </div>
   </div>
