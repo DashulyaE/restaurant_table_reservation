@@ -1,6 +1,7 @@
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
+from reservations.forms import RestaurantForm
 from reservations.models import Restaurant
 
 
@@ -14,13 +15,13 @@ class RestaurantDetailView(DetailView):
 
 class RestaurantCreateView(CreateView):
     model = Restaurant
-    fields = '__all__'
+    form_class = RestaurantForm
     success_url = reverse_lazy('reservations:restaurants_list')
 
 
 class RestaurantUpdateView(UpdateView):
     model = Restaurant
-    fields = '__all__'
+    form_class = RestaurantForm
     success_url = reverse_lazy('reservations:restaurants_list')
 
     def get_success_url(self):
