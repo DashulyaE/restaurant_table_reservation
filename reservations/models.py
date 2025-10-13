@@ -45,7 +45,7 @@ class Table(models.Model):
     class Meta:
         verbose_name = "Стол"
         verbose_name_plural = "Столы"
-        ordering = ["size"]
+        ordering = ["restaurant", "size"]
 
     def __str__(self):
         return f"Table {self.number} in {self.restaurant.name}"

@@ -1,6 +1,7 @@
 from django.forms import ModelForm, BooleanField
 
-from reservations.models import Restaurant
+from reservations.models import Restaurant, Table
+
 
 class StyleFormMixin:
     def __init__(self, *args, **kwargs):
@@ -18,4 +19,10 @@ class StyleFormMixin:
 class RestaurantForm(StyleFormMixin, ModelForm):
     class Meta:
         model = Restaurant
+        fields = '__all__'
+
+
+class TableForm(StyleFormMixin, ModelForm):
+    class Meta:
+        model = Table
         fields = '__all__'

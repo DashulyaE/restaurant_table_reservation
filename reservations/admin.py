@@ -4,13 +4,13 @@ from .models import Restaurant, Table, Reservation
 
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
-    list_display = ("name", "address")
+    list_display = ("id", "name", "address")
     search_fields = ("name", "address")
 
 
 @admin.register(Table)
 class TableAdmin(admin.ModelAdmin):
-    list_display = ("number", "restaurant", "size")
+    list_display = ("id", "number", "restaurant", "size")
     list_filter = ("restaurant",)
     search_fields = ("number",)
 
