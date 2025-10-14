@@ -28,7 +28,7 @@
           </div>
           <div class="d-flex gap-2">
             <a href="{% url 'reservations:restaurants_list' %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Назад</a>
-            <a href="#" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
+            <a href="{% url 'reservations:reservation_create' %}?restaurant={{ restaurant.pk }}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
           </div>
         </div>
       </div>
