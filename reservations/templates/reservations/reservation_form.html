@@ -26,9 +26,14 @@
         <label for="restaurant" class="form-label">Ресторан</label>
         <select name="restaurant" id="restaurant" class="form-control" required>
           <option value="">Выберите ресторан</option>
-          {% for restaurant in form.fields.restaurant.queryset %}
-            <option value="{{ restaurant.id }}">{{ restaurant.name }}</option>
-          {% endfor %}
+            <option value="{{ restaurant.id }}"
+              {% if form.data.restaurant|default_if_none:'' == restaurant.id|stringformat:"s" %}
+                selected
+              {% elif selected_restaurant_id and selected_restaurant_id == restaurant.id %}
+                selected
+              {% endif %}>
+              {{ restaurant.name }}
+            </option>
         </select>
       </div>
       <button type="submit" name="select_restaurant" class="btn btn-primary">Выбрать</button>
@@ -49,6 +54,18 @@
         </div>
         {% endif %}
       {% endfor %}
+      <!-- Отобразим поле restaurant, если оно есть в форме -->
+      {% if form.fields.restaurant %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.restaurant.id_for_label }}">{{ form.restaurant.label }}</label>
+        {{ form.restaurant }}
+        {% if form.restaurant.errors %}
+          <div class="invalid-feedback d-block">
+            {{ form.restaurant.errors|striptags }}
+          </div>
+        {% endif %}
+      </div>
+      {% endif %}
       <button type="submit" class="btn btn-primary">
         {% if object %}
         Сохранить

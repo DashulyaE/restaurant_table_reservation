@@ -4,6 +4,8 @@ from reservations.models import Restaurant, Table, Reservation
 
 
 class StyleFormMixin:
+    """Класс-миксин для изменения стиля формы"""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
@@ -17,18 +19,24 @@ class StyleFormMixin:
 
 
 class RestaurantForm(StyleFormMixin, ModelForm):
+    """Форма для создания ресторана"""
+
     class Meta:
         model = Restaurant
         fields = '__all__'
 
 
 class TableForm(StyleFormMixin, ModelForm):
+    """Форма для создания стола"""
+
     class Meta:
         model = Table
         fields = '__all__'
 
 
 class ReservationForm(StyleFormMixin, ModelForm):
+    """Форма для создания резерва стола"""
+
     restaurant = ModelChoiceField(
         queryset=Restaurant.objects.all(),
         required=False,
@@ -48,7 +56,6 @@ class ReservationForm(StyleFormMixin, ModelForm):
             # Устанавливаем queryset для restaurant, если оно не установлено
             if not self.fields['restaurant'].queryset.exists():
                 self.fields['restaurant'].queryset = Restaurant.objects.filter(pk=self.instance.restaurant.pk)
-            # Аналогично для table
             if self.instance.table:
                 self.fields['table'].queryset = Table.objects.filter(restaurant=self.instance.restaurant)
             else:
@@ -61,3 +68,11 @@ class ReservationForm(StyleFormMixin, ModelForm):
         else:
             self.fields['table'].queryset = Table.objects.none()
             self.fields['restaurant'].required = True
+
+    def save(self, commit=True):
+        reservation = super().save(commit=False)
+        if 'restaurant' in self.cleaned_data:
+            reservation.restaurant = self.cleaned_data['restaurant']
+        if commit:
+            reservation.save()
+        return reservation

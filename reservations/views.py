@@ -111,13 +111,13 @@ class ReservationCreateView(CreateView):
         context['back_url'] = reverse('reservations:restaurants_list')
         return context
 
-
     def post(self, request, *args, **kwargs):
         if 'select_restaurant' in request.POST:
             restaurant_id = request.POST.get('restaurant')
             if restaurant_id:
                 return redirect(f"{request.path}?restaurant={restaurant_id}")
         return super().post(request, *args, **kwargs)
+
 
 class ReservationDeleteView(DeleteView):
     model = Reservation
@@ -143,5 +143,8 @@ class ReservationUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['back_url'] = reverse('reservations:reservation_list')
+        if self.object and self.object.restaurant:
+            context['selected_restaurant_id'] = self.object.restaurant.pk
+        else:
+            context['selected_restaurant_id'] = None
         return context
-
