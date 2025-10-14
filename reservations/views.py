@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
@@ -77,6 +77,13 @@ class ReservationCreateView(CreateView):
     form_class = ReservationForm
     success_url = reverse_lazy('reservations:reservation_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        restaurant_id = self.request.GET.get('restaurant')
+        if restaurant_id:
+            kwargs['restaurant_id'] = restaurant_id
+        return kwargs
+
     def get_initial(self):
         initial = super().get_initial()
         restaurant_id = self.request.GET.get('restaurant')
@@ -87,22 +94,24 @@ class ReservationCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         restaurant_id = self.request.GET.get('restaurant')
-        if restaurant_id:
+        if not restaurant_id:
+            # Если ресторан не выбран, показываем список ресторанов для выбора
+            context['show_restaurant_selection'] = True
+        else:
+            # Если выбран, показываем название ресторана
             try:
                 restaurant = Restaurant.objects.get(pk=restaurant_id)
                 context['restaurant_name'] = restaurant.name
             except Restaurant.DoesNotExist:
                 context['restaurant_name'] = ''
-        else:
-            context['restaurant_name'] = ''
         return context
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        restaurant_id = self.request.GET.get('restaurant')
-        if restaurant_id:
-            kwargs['restaurant_id'] = restaurant_id
-        return kwargs
+    def post(self, request, *args, **kwargs):
+        if 'select_restaurant' in request.POST:
+            restaurant_id = request.POST.get('restaurant')
+            if restaurant_id:
+                return redirect(f"{request.path}?restaurant={restaurant_id}")
+        return super().post(request, *args, **kwargs)
 
 # class ReservationCreateView(CreateView):
 #     model = Reservation

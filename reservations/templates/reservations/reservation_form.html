@@ -3,25 +3,41 @@
 <div class="container mt-5 d-flex justify-content-center">
   <div style="width: 400px;">
     <div class="card-header">
-      <h4 class="my-0 font-weight-normal">
+      <h3>
+        {% if show_restaurant_selection %}
+          Выберите ресторан
+        {% else %}
           {% if object %}
-          Редактировать резерв
+            Редактировать резерв
           {% else %}
-          Создать резерв
+            {% if restaurant_name %}
+              Создать резерв столика в ресторане "{{ restaurant_name }}"
+            {% else %}
+              Создать резерв
+            {% endif %}
           {% endif %}
-      </h4>
+        {% endif %}
+      </h3>
     </div>
+    {% if show_restaurant_selection %}
+    <form method="post" class="needs-validation" novalidate>
+      {% csrf_token %}
+      <div class="mb-3">
+        <label for="restaurant" class="form-label">Ресторан</label>
+        <select name="restaurant" id="restaurant" class="form-control" required>
+          <option value="">Выберите ресторан</option>
+          {% for restaurant in form.fields.restaurant.queryset %}
+            <option value="{{ restaurant.id }}">{{ restaurant.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" name="select_restaurant" class="btn btn-primary">Выбрать</button>
+    </form>
+    {% else %}
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
       {% csrf_token %}
-
-      {% if restaurant_name %}
-        <div class="mb-3">
-          <label class="form-label">Ресторан:</label>
-          <p class="form-control-plaintext">{{ restaurant_name }}</p>
-        </div>
-      {% endif %}
-
       {% for field in form %}
+        {% if field.name != 'restaurant' %}
         <div class="mb-3">
           <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
@@ -31,8 +47,8 @@
             </div>
           {% endif %}
         </div>
+        {% endif %}
       {% endfor %}
-
       <button type="submit" class="btn btn-primary">
         {% if object %}
         Сохранить
@@ -42,6 +58,7 @@
       </button>
       <a href="{% url 'reservations:reservation_list' %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Назад</a>
     </form>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

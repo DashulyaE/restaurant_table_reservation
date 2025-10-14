@@ -28,7 +28,13 @@ class TableForm(StyleFormMixin, ModelForm):
         fields = '__all__'
 
 
-class ReservationForm(ModelForm):
+class ReservationForm(StyleFormMixin, ModelForm):
+    restaurant = ModelChoiceField(
+        queryset=Restaurant.objects.all(),
+        required=False,
+        label='Ресторан'
+    )
+
     class Meta:
         model = Reservation
         fields = '__all__'
@@ -37,6 +43,10 @@ class ReservationForm(ModelForm):
         restaurant_id = kwargs.pop('restaurant_id', None)
         super().__init__(*args, **kwargs)
         if restaurant_id:
+            self.fields['restaurant'].queryset = Restaurant.objects.filter(pk=restaurant_id)
+            self.fields['restaurant'].disabled = True
+            # Ограничиваем выбор столов
             self.fields['table'].queryset = Table.objects.filter(restaurant_id=restaurant_id)
         else:
             self.fields['table'].queryset = Table.objects.none()
+            self.fields['restaurant'].required = True
