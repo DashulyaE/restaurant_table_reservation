@@ -106,6 +106,12 @@ class ReservationCreateView(CreateView):
                 context['restaurant_name'] = ''
         return context
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['back_url'] = reverse('reservations:restaurants_list')
+        return context
+
+
     def post(self, request, *args, **kwargs):
         if 'select_restaurant' in request.POST:
             restaurant_id = request.POST.get('restaurant')
@@ -113,7 +119,21 @@ class ReservationCreateView(CreateView):
                 return redirect(f"{request.path}?restaurant={restaurant_id}")
         return super().post(request, *args, **kwargs)
 
-# class ReservationCreateView(CreateView):
-#     model = Reservation
-#     form_class = ReservationForm
-#     success_url = reverse_lazy('reservations:reservation_list')
+class ReservationDeleteView(DeleteView):
+    model = Reservation
+    success_url = reverse_lazy('reservations:reservation_list')
+    template_name = 'reservations/reservation_confirm_delete.html'
+
+
+class ReservationUpdateView(UpdateView):
+    model = Reservation
+    form_class = ReservationForm
+    success_url = reverse_lazy('reservations:reservation_list')
+
+    def get_success_url(self):
+        return reverse('reservations:reservation_detail', args=[self.kwargs.get('pk')])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['back_url'] = reverse('reservations:reservation_list')
+        return context

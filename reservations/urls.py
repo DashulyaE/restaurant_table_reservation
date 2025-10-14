@@ -5,7 +5,7 @@ from config import settings
 from reservations.apps import ReservationsConfig
 from reservations.views import RestaurantListView, RestaurantDetailView, RestaurantCreateView, RestaurantUpdateView, \
     RestaurantDeleteView, TableListView, TableDetailView, TableCreateView, TableUpdateView, TableDeleteView, \
-    ReservationListView, ReservationDetailView, ReservationCreateView
+    ReservationListView, ReservationDetailView, ReservationCreateView, ReservationDeleteView, ReservationUpdateView
 
 app_name = ReservationsConfig.name
 
@@ -25,4 +25,6 @@ urlpatterns = [
     path("reservation/", ReservationListView.as_view(), name='reservation_list'),
     path("reservation/<int:pk>/", ReservationDetailView.as_view(), name='reservation_detail'),
     path("reservation/create", ReservationCreateView.as_view(), name='reservation_create'),
+    path("reservation/<int:pk>/delete/", ReservationDeleteView.as_view(), name='reservation_delete'),
+    path("reservation/<int:pk>/update/", ReservationUpdateView.as_view(), name='reservation_update'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
