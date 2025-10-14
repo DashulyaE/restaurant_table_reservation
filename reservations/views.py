@@ -130,6 +130,13 @@ class ReservationUpdateView(UpdateView):
     form_class = ReservationForm
     success_url = reverse_lazy('reservations:reservation_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Передача restaurant_id для инициализации формы
+        if self.object:
+            kwargs['restaurant_id'] = self.object.restaurant.pk
+        return kwargs
+
     def get_success_url(self):
         return reverse('reservations:reservation_detail', args=[self.kwargs.get('pk')])
 
@@ -137,3 +144,4 @@ class ReservationUpdateView(UpdateView):
         context = super().get_context_data(**kwargs)
         context['back_url'] = reverse('reservations:reservation_list')
         return context
+

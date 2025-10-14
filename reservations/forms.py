@@ -42,10 +42,21 @@ class ReservationForm(StyleFormMixin, ModelForm):
     def __init__(self, *args, **kwargs):
         restaurant_id = kwargs.pop('restaurant_id', None)
         super().__init__(*args, **kwargs)
-        if restaurant_id:
+
+        # Если есть instance, то поля автоматически заполнятся
+        if self.instance and self.instance.pk:
+            # Устанавливаем queryset для restaurant, если оно не установлено
+            if not self.fields['restaurant'].queryset.exists():
+                self.fields['restaurant'].queryset = Restaurant.objects.filter(pk=self.instance.restaurant.pk)
+            # Аналогично для table
+            if self.instance.table:
+                self.fields['table'].queryset = Table.objects.filter(restaurant=self.instance.restaurant)
+            else:
+                self.fields['table'].queryset = Table.objects.none()
+
+        elif restaurant_id:
             self.fields['restaurant'].queryset = Restaurant.objects.filter(pk=restaurant_id)
             self.fields['restaurant'].disabled = True
-            # Ограничиваем выбор столов
             self.fields['table'].queryset = Table.objects.filter(restaurant_id=restaurant_id)
         else:
             self.fields['table'].queryset = Table.objects.none()
