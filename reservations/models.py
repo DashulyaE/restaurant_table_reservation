@@ -61,9 +61,9 @@ class Reservation(models.Model):
     customer_name = models.CharField(max_length=255, verbose_name="Имя клиента")
     telephone = models.CharField(max_length=255, verbose_name="Телефон клиента")
     number_of_guests = models.PositiveIntegerField(help_text="Количество гостей", verbose_name="Количество гостей")
-    reservation_date = models.DateField(help_text="Дата брони", verbose_name="Дата брони")
-    reservation_start = models.TimeField(help_text="Время начала брони", verbose_name="Время начала брони")
-    reservation_and = models.TimeField(help_text="Время окончания брони", verbose_name="Время окончания брони")
+    reservation_date = models.DateField(help_text="Дата брони", verbose_name="Дата брони", null=True, blank=True)
+    reservation_start = models.TimeField(help_text="Время начала брони", verbose_name="Время начала брони", null=True, blank=True)
+    reservation_and = models.TimeField(help_text="Время окончания брони", verbose_name="Время окончания брони", null=True, blank=True)
     status_choices = [
         ("confirmed", "Подтверждено"),
         ("cancelled", "Отменено"),
@@ -79,4 +79,4 @@ class Reservation(models.Model):
         ordering = ["reservation_date", "reservation_start"]
 
     def __str__(self):
-        return f"Резервирование на имя {self.customer_name} стола {self.reservation_datetime}"
+        return f"Резервирование на имя {self.customer_name} стола {self.reservation_date}"

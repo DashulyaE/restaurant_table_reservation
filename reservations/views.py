@@ -145,4 +145,13 @@ class ReservationUpdateView(UpdateView):
     model = Reservation
     form_class = ReservationStatusForm
     success_url = reverse_lazy("reservations:reservation_list")
-    template_name = "reservations/reservation_status_update.html"  # ваш шаблон
+    template_name = "reservations/reservation_status_update.html"
+
+    def form_valid(self, form):
+        # Проверяем, что статус меняется на 'cancelled'
+        if form.instance.status == 'cancelled':
+            self.object.reservation_date = None
+            self.object.reservation_start = None
+            self.object.reservation_and = None
+            self.object.save()
+        return super().form_valid(form)
