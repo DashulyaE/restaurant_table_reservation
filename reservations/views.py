@@ -7,6 +7,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 
 from reservations.forms import RestaurantForm, TableForm, ReservationForm
 from reservations.models import Restaurant, Table, Reservation
+from reservations.utils import get_date_list, get_time_slots
 
 
 class RestaurantListView(ListView):
@@ -74,7 +75,6 @@ class ReservationListView(ListView):
 class ReservationDetailView(DetailView):
     model = Reservation
 
-from django.shortcuts import get_object_or_404
 
 class ReservationCreateView(CreateView):
     model = Reservation
@@ -83,35 +83,54 @@ class ReservationCreateView(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["reservation_date"] = self.request.GET.get("reservation_date")
-        kwargs["reservation_start"] = self.request.GET.get("reservation_start")
-        kwargs["reservation_and"] = self.request.GET.get("reservation_and")
-        kwargs["restaurant_id"] = self.request.GET.get("restaurant")
+        # Передача request, чтобы форма могла получить параметры из GET
+        kwargs['request'] = self.request
         return kwargs
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["reservation_date"] = self.request.GET.get("reservation_date")
-        initial["reservation_start"] = self.request.GET.get("reservation_start")
-        initial["reservation_and"] = self.request.GET.get("reservation_and")
-        restaurant_id = self.request.GET.get("restaurant")
+        initial['reservation_date'] = self.request.GET.get('reservation_date')
+        initial['reservation_start'] = self.request.GET.get('reservation_start')
+        initial['reservation_and'] = self.request.GET.get('reservation_and')
+        restaurant_id = self.request.GET.get('restaurant')
         if restaurant_id:
             try:
                 restaurant_obj = Restaurant.objects.get(pk=restaurant_id)
-                initial["restaurant"] = restaurant_obj
+                initial['restaurant'] = restaurant_obj
             except Restaurant.DoesNotExist:
                 pass
         return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        restaurant_id = self.request.GET.get("restaurant")
-        if restaurant_id:
-            restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
-            context['restaurant_name'] = restaurant.name
-        else:
-            context['restaurant_name'] = None
+        # Передача списка ресторанов
         context['restaurants'] = Restaurant.objects.all()
+
+        # Получение параметров из GET-запроса
+        restaurant_id = self.request.GET.get('restaurant')
+        date = self.request.GET.get('reservation_date')
+        start_time = self.request.GET.get('reservation_start')
+        end_time = self.request.GET.get('reservation_and')
+
+        # Передача списков для шаблона
+        context['date_list'] = get_date_list()
+        context['time_slots'] = get_time_slots()
+
+        # Фильтрация столов по выбранным параметрам
+        if restaurant_id and date and start_time and end_time:
+            tables_qs = Table.objects.filter(restaurant_id=restaurant_id)
+            reserved_tables = Reservation.objects.filter(
+                restaurant_id=restaurant_id,
+                reservation_date=date,
+                reservation_and__gt=start_time,
+                reservation_start__lt=end_time,
+            ).values_list('table_id', flat=True)
+            context['available_tables'] = tables_qs.exclude(id__in=reserved_tables)
+        elif restaurant_id:
+            context['available_tables'] = Table.objects.filter(restaurant_id=restaurant_id)
+        else:
+            context['available_tables'] = Table.objects.none()
+
         return context
 
 # class ReservationCreateView(CreateView):
@@ -132,8 +151,25 @@ class ReservationCreateView(CreateView):
 #         initial["reservation_date"] = self.request.GET.get("reservation_date")
 #         initial["reservation_start"] = self.request.GET.get("reservation_start")
 #         initial["reservation_and"] = self.request.GET.get("reservation_and")
-#         initial["restaurant"] = self.request.GET.get("restaurant")
+#         restaurant_id = self.request.GET.get("restaurant")
+#         if restaurant_id:
+#             try:
+#                 restaurant_obj = Restaurant.objects.get(pk=restaurant_id)
+#                 initial["restaurant"] = restaurant_obj
+#             except Restaurant.DoesNotExist:
+#                 pass
 #         return initial
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         restaurant_id = self.request.GET.get("restaurant")
+#         if restaurant_id:
+#             restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
+#             context['restaurant_name'] = restaurant.name
+#         else:
+#             context['restaurant_name'] = None
+#         context['restaurants'] = Restaurant.objects.all()
+#         return context
 
 
 class ReservationDeleteView(DeleteView):
