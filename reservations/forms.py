@@ -37,6 +37,8 @@ class TableForm(StyleFormMixin, ModelForm):
 
 
 class ReservationForm(StyleFormMixin, ModelForm):
+    """Форма для создания резерва стола"""
+
     reservation_date = ChoiceField(label="Дата", choices=[])
     reservation_start = ChoiceField(label="Время начала", choices=[])
     reservation_and = ChoiceField(label="Время окончания", choices=[])
@@ -111,98 +113,11 @@ class ReservationForm(StyleFormMixin, ModelForm):
 
             if end_time <= start_time:
                 self.add_error("reservation_and", "Время окончания не должно быть меньше или равно времени начала.")
-# class ReservationForm(StyleFormMixin, ModelForm):
-#     reservation_date = ChoiceField(label="Дата", choices=[])
-#     reservation_start = ChoiceField(label="Время начала", choices=[])
-#     reservation_and = ChoiceField(label="Время окончания", choices=[])
-#     table = ModelChoiceField(queryset=Table.objects.none(), label="Стол")
-#     restaurant = ModelChoiceField(queryset=Restaurant.objects.all(), label="Ресторан")  # добавляем поле
-#
-#     class Meta:
-#         model = Reservation
-#         fields = "__all__"
-#
-#     def __init__(self, *args, **kwargs):
-#         reservation_date = kwargs.pop("reservation_date", None)
-#         reservation_start = kwargs.pop("reservation_start", None)
-#         reservation_and = kwargs.pop("reservation_and", None)
-#         restaurant_id = kwargs.pop("restaurant_id", None)
-#         super().__init__(*args, **kwargs)
-#
-#         # Заполняем выборы дат и времени
-#         self.fields["reservation_date"].choices = [(date, date) for date in get_date_list()]
-#         self.fields["reservation_start"].choices = [(time, time) for time in get_time_slots()]
-#         self.fields["reservation_and"].choices = [(time, time) for time in get_time_slots()]
-#
-#         # Устанавливаем queryset для ресторана
-#         if restaurant_id:
-#             self.fields["restaurant"].queryset = Restaurant.objects.filter(pk=restaurant_id)
-#             self.fields["restaurant"].initial = restaurant_id
-#         else:
-#             self.fields["restaurant"].queryset = Restaurant.objects.all()
-#
-#         # Фильтруем таблицы по ресторану
-#         if restaurant_id:
-#             self.fields["table"].queryset = Table.objects.filter(restaurant_id=restaurant_id)
-#         else:
-#             self.fields["table"].queryset = Table.objects.none()
-#
-#         # Обновляем доступные таблицы по выбранной дате и времени
-#         self.update_available_tables()
-#
-#     def update_available_tables(self):
-#         data = self.data if self.data else self.initial
-#         restaurant_id = data.get('restaurant') or getattr(self.instance, 'restaurant_id', None)
-#         reservation_date = data.get('reservation_date') or getattr(self.instance, 'reservation_date', None)
-#         reservation_start = data.get('reservation_start') or getattr(self.instance, 'reservation_start', None)
-#         reservation_and = data.get('reservation_and') or getattr(self.instance, 'reservation_and', None)
-#
-#         if restaurant_id and reservation_date and reservation_start and reservation_and:
-#             available_tables = self.get_available_tables(
-#                 restaurant_id, reservation_date, reservation_start, reservation_and
-#             )
-#             self.fields['table'].queryset = available_tables
-#             # Если текущий выбранный стол недоступен, сбросить его
-#             if self.instance.pk:
-#                 current_table_id = getattr(self.instance, 'table_id', None)
-#                 if current_table_id and not available_tables.filter(id=current_table_id).exists():
-#                     self.fields['table'].initial = None
-#         else:
-#             # Если данных недостаточно, показываем все таблицы выбранного ресторана
-#             if restaurant_id:
-#                 self.fields['table'].queryset = Table.objects.filter(restaurant_id=restaurant_id)
-#             else:
-#                 self.fields['table'].queryset = Table.objects.none()
-#
-#     def get_available_tables(self, restaurant_id, date, start_time, end_time):
-#         tables = Table.objects.filter(restaurant_id=restaurant_id)
-#         reserved_tables = Reservation.objects.filter(
-#             restaurant_id=restaurant_id,
-#             reservation_date=date,
-#             reservation_and__gt=start_time,
-#             reservation_start__lt=end_time,
-#         ).values_list("table_id", flat=True)
-#         return tables.exclude(id__in=reserved_tables)
-#
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         start_time = cleaned_data.get("reservation_start")
-#         end_time = cleaned_data.get("reservation_and")
-#         table = cleaned_data.get("table")
-#         reservation_date = cleaned_data.get("reservation_date")
-#         if start_time and end_time:
-#             if end_time <= start_time:
-#                 self.add_error("reservation_and", "Время окончания не должно быть меньше или равно времени начала.")
-#         # Проверка, что выбранный стол свободен в выбранное время
-#         if table and reservation_date and start_time and end_time:
-#             conflicting = Reservation.objects.filter(
-#                 table=table,
-#                 reservation_date=reservation_date,
-#                 reservation_and__gt=start_time,
-#                 reservation_start__lt=end_time,
-#             )
-#             if self.instance.pk:
-#                 conflicting = conflicting.exclude(pk=self.instance.pk)
-#             if conflicting.exists():
-#                 self.add_error('table', 'Этот стол уже забронирован на выбранное время.')
-#         return cleaned_data
+
+
+class ReservationStatusForm(StyleFormMixin, ModelForm):
+    """Форма для редактирования статуса резерва"""
+
+    class Meta:
+        model = Reservation
+        fields = ['status']
