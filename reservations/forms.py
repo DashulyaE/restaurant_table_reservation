@@ -47,7 +47,7 @@ class ReservationForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Reservation
-        fields = "__all__"
+        exclude = ['original_reservation_date', 'original_reservation_start', 'original_reservation_and']
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

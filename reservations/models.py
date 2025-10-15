@@ -64,6 +64,15 @@ class Reservation(models.Model):
     reservation_date = models.DateField(help_text="Дата брони", verbose_name="Дата брони", null=True, blank=True)
     reservation_start = models.TimeField(help_text="Время начала брони", verbose_name="Время начала брони", null=True, blank=True)
     reservation_and = models.TimeField(help_text="Время окончания брони", verbose_name="Время окончания брони", null=True, blank=True)
+    original_reservation_date = models.DateField(
+        verbose_name="Дата бронирования (оригинальная)", null=True, blank=True
+    )
+    original_reservation_start = models.TimeField(
+        verbose_name="Время начала (оригинальное)", null=True, blank=True
+    )
+    original_reservation_and = models.TimeField(
+        verbose_name="Время окончания (оригинальное)", null=True, blank=True
+    )
     status_choices = [
         ("confirmed", "Подтверждено"),
         ("cancelled", "Отменено"),
@@ -80,3 +89,18 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f"Резервирование на имя {self.customer_name} стола {self.reservation_date}"
+
+    def save(self, *args, **kwargs):
+        if self.status == 'cancelled':
+            # сохраняем текущие значения в "оригинальные"
+            if not self.original_reservation_date:
+                self.original_reservation_date = self.reservation_date
+            if not self.original_reservation_start:
+                self.original_reservation_start = self.reservation_start
+            if not self.original_reservation_and:
+                self.original_reservation_and = self.reservation_and
+            # обнуляем основные поля
+            self.reservation_date = None
+            self.reservation_start = None
+            self.reservation_and = None
+        super().save(*args, **kwargs)

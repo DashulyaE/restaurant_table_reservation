@@ -72,6 +72,14 @@ class TableDeleteView(DeleteView):
 class ReservationListView(ListView):
     model = Reservation
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        for reservation in qs:
+            reservation.display_reservation_date = reservation.original_reservation_date
+            reservation.display_reservation_start = reservation.original_reservation_start
+            reservation.display_reservation_and = reservation.original_reservation_and
+        return qs
+
 
 class ReservationDetailView(DetailView):
     model = Reservation
@@ -87,6 +95,13 @@ class ReservationCreateView(CreateView):
         # Передача request, чтобы форма могла получить параметры из GET
         kwargs['request'] = self.request
         return kwargs
+
+    def form_valid(self, form):
+        # Перед сохранением заполняем поля дублей
+        form.instance.original_reservation_date = form.instance.reservation_date
+        form.instance.original_reservation_start = form.instance.reservation_start
+        form.instance.original_reservation_and = form.instance.reservation_and
+        return super().form_valid(form)
 
     def get_initial(self):
         initial = super().get_initial()
@@ -155,3 +170,12 @@ class ReservationUpdateView(UpdateView):
             self.object.reservation_and = None
             self.object.save()
         return super().form_valid(form)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Проверяем статус брони
+        if self.object.status == 'cancelled':
+            # делаем все поля недоступными
+            for field in form.fields.values():
+                field.disabled = True
+        return form
