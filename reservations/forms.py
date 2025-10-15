@@ -101,27 +101,16 @@ class ReservationForm(StyleFormMixin, ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        start_time = cleaned_data.get("reservation_start")
-        end_time = cleaned_data.get("reservation_and")
-        table = cleaned_data.get("table")
-        reservation_date = cleaned_data.get("reservation_date")
-        if start_time and end_time:
+        start_time_str = cleaned_data.get("reservation_start")
+        end_time_str = cleaned_data.get("reservation_and")
+
+        if start_time_str and end_time_str:
+            from datetime import datetime
+            start_time = datetime.strptime(start_time_str, "%H:%M").time()
+            end_time = datetime.strptime(end_time_str, "%H:%M").time()
+
             if end_time <= start_time:
                 self.add_error("reservation_and", "Время окончания не должно быть меньше или равно времени начала.")
-        # Проверка, что выбранный стол свободен в выбранное время
-        if table and reservation_date and start_time and end_time:
-            conflicting = Reservation.objects.filter(
-                table=table,
-                reservation_date=reservation_date,
-                reservation_and__gt=start_time,
-                reservation_start__lt=end_time,
-            )
-            if self.instance.pk:
-                conflicting = conflicting.exclude(pk=self.instance.pk)
-            if conflicting.exists():
-                self.add_error('table', 'Этот стол уже забронирован на выбранное время.')
-        return cleaned_data
-
 # class ReservationForm(StyleFormMixin, ModelForm):
 #     reservation_date = ChoiceField(label="Дата", choices=[])
 #     reservation_start = ChoiceField(label="Время начала", choices=[])
