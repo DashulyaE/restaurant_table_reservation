@@ -74,6 +74,7 @@ class ReservationListView(ListView):
 class ReservationDetailView(DetailView):
     model = Reservation
 
+from django.shortcuts import get_object_or_404
 
 class ReservationCreateView(CreateView):
     model = Reservation
@@ -93,8 +94,46 @@ class ReservationCreateView(CreateView):
         initial["reservation_date"] = self.request.GET.get("reservation_date")
         initial["reservation_start"] = self.request.GET.get("reservation_start")
         initial["reservation_and"] = self.request.GET.get("reservation_and")
-        initial["restaurant"] = self.request.GET.get("restaurant")
+        restaurant_id = self.request.GET.get("restaurant")
+        if restaurant_id:
+            try:
+                restaurant_obj = Restaurant.objects.get(pk=restaurant_id)
+                initial["restaurant"] = restaurant_obj
+            except Restaurant.DoesNotExist:
+                pass
         return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        restaurant_id = self.request.GET.get("restaurant")
+        if restaurant_id:
+            restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
+            context['restaurant_name'] = restaurant.name
+        else:
+            context['restaurant_name'] = None
+        context['restaurants'] = Restaurant.objects.all()
+        return context
+
+# class ReservationCreateView(CreateView):
+#     model = Reservation
+#     form_class = ReservationForm
+#     success_url = reverse_lazy("reservations:reservation_list")
+#
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs["reservation_date"] = self.request.GET.get("reservation_date")
+#         kwargs["reservation_start"] = self.request.GET.get("reservation_start")
+#         kwargs["reservation_and"] = self.request.GET.get("reservation_and")
+#         kwargs["restaurant_id"] = self.request.GET.get("restaurant")
+#         return kwargs
+#
+#     def get_initial(self):
+#         initial = super().get_initial()
+#         initial["reservation_date"] = self.request.GET.get("reservation_date")
+#         initial["reservation_start"] = self.request.GET.get("reservation_start")
+#         initial["reservation_and"] = self.request.GET.get("reservation_and")
+#         initial["restaurant"] = self.request.GET.get("restaurant")
+#         return initial
 
 
 class ReservationDeleteView(DeleteView):

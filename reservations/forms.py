@@ -41,6 +41,7 @@ class ReservationForm(StyleFormMixin, ModelForm):
     reservation_start = ChoiceField(label="Время начала", choices=[])
     reservation_and = ChoiceField(label="Время окончания", choices=[])
     table = ModelChoiceField(queryset=Table.objects.none(), label="Стол")
+    restaurant = ModelChoiceField(queryset=Restaurant.objects.all(), label="Ресторан")  # добавляем поле
 
     class Meta:
         model = Reservation
@@ -61,6 +62,7 @@ class ReservationForm(StyleFormMixin, ModelForm):
         # Устанавливаем queryset для ресторана
         if restaurant_id:
             self.fields["restaurant"].queryset = Restaurant.objects.filter(pk=restaurant_id)
+            self.fields["restaurant"].initial = restaurant_id
         else:
             self.fields["restaurant"].queryset = Restaurant.objects.all()
 
@@ -92,50 +94,5 @@ class ReservationForm(StyleFormMixin, ModelForm):
         end_time = cleaned_data.get("reservation_and")
         if start_time and end_time:
             if end_time <= start_time:
-                # Добавляем ошибку именно к полю 'reservation_and'
                 self.add_error("reservation_and", "Время окончания не должно быть меньше или равно времени начала.")
         return cleaned_data
-
-
-# class ReservationForm(StyleFormMixin, ModelForm):
-#     """Форма для создания резерва стола"""
-#
-#     restaurant = ModelChoiceField(
-#         queryset=Restaurant.objects.all(),
-#         required=False,
-#         label='Ресторан'
-#     )
-#
-#     class Meta:
-#         model = Reservation
-#         fields = '__all__'
-#
-#     def __init__(self, *args, **kwargs):
-#         restaurant_id = kwargs.pop('restaurant_id', None)
-#         super().__init__(*args, **kwargs)
-#
-#         # Если есть instance, то поля автоматически заполнятся
-#         if self.instance and self.instance.pk:
-#             # Устанавливаем queryset для restaurant, если оно не установлено
-#             if not self.fields['restaurant'].queryset.exists():
-#                 self.fields['restaurant'].queryset = Restaurant.objects.filter(pk=self.instance.restaurant.pk)
-#             if self.instance.table:
-#                 self.fields['table'].queryset = Table.objects.filter(restaurant=self.instance.restaurant)
-#             else:
-#                 self.fields['table'].queryset = Table.objects.none()
-#
-#         elif restaurant_id:
-#             self.fields['restaurant'].queryset = Restaurant.objects.filter(pk=restaurant_id)
-#             self.fields['restaurant'].disabled = True
-#             self.fields['table'].queryset = Table.objects.filter(restaurant_id=restaurant_id)
-#         else:
-#             self.fields['table'].queryset = Table.objects.none()
-#             self.fields['restaurant'].required = True
-#
-#     def save(self, commit=True):
-#         reservation = super().save(commit=False)
-#         if 'restaurant' in self.cleaned_data:
-#             reservation.restaurant = self.cleaned_data['restaurant']
-#         if commit:
-#             reservation.save()
-#         return reservation

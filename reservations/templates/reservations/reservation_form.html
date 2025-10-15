@@ -44,7 +44,6 @@
     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
       {% csrf_token %}
 
-      <!-- Поля для выбора даты и времени -->
       <div class="mb-3">
         <label for="id_reservation_date" class="form-label">Дата</label>
         {{ form.reservation_date }}
@@ -58,7 +57,14 @@
         {{ form.reservation_and }}
       </div>
 
-      <!-- Поле для выбора номера стола -->
+      <div class="mb-3">
+        <label for="{{ form.restaurant.id_for_label }}" class="form-label">Ресторан</label>
+        {{ form.restaurant }}
+        {% if form.restaurant.errors %}
+          <div class="invalid-feedback d-block">{{ form.restaurant.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
       <div class="mb-3">
         <label for="{{ form.table.id_for_label }}" class="form-label">Стол</label>
         {{ form.table }}
@@ -67,9 +73,8 @@
         {% endif %}
       </div>
 
-      <!-- Остальные поля формы -->
       {% for field in form %}
-        {% if field.name not in 'reservation_date reservation_start reservation_and table' %}
+        {% if field.name not in 'reservation_date reservation_start reservation_and table' and field.name != 'restaurant' %}
         <div class="mb-3">
           <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
