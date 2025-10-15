@@ -1,5 +1,8 @@
 {% extends 'reservations/base.html' %}
 {% block content %}
+<div class="mb-4 d-flex justify-content-end">
+  <a href="{% url 'reservations:restaurant_create' %}" class="btn btn-success fs-5">Добавить ресторан</a>
+</div>
 <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
   {% for restaurant in object_list %}
   <div class="col d-flex align-items-stretch">
