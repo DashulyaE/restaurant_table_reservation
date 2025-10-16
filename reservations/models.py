@@ -1,12 +1,12 @@
 from django.db import models
-
+from phonenumber_field.modelfields import PhoneNumberField
 
 class Restaurant(models.Model):
     """Модель класса ресторан"""
 
     name = models.CharField(max_length=255, verbose_name="Название ресторана", help_text="Введите название ресторана")
     address = models.CharField(max_length=500, verbose_name="Адрес ресторана", help_text="Введите адрес ресторана")
-    contact_info = models.CharField(max_length=255, verbose_name="Телефон ресторана")
+    contact_info = PhoneNumberField(region='RU', verbose_name="Телефон ресторана")
     description = models.TextField(
         blank=True, null=True, verbose_name="Описание ресторана", help_text="Внесите краткое описание ресторана"
     )
@@ -48,7 +48,7 @@ class Table(models.Model):
         ordering = ["restaurant", "size"]
 
     def __str__(self):
-        return f"Table {self.number} in {self.restaurant.name}"
+        return f"Стол {self.number} в {self.restaurant.name}"
 
 
 class Reservation(models.Model):
@@ -59,7 +59,7 @@ class Reservation(models.Model):
     )
     table = models.ForeignKey(Table, on_delete=models.CASCADE, verbose_name="Номер стола", related_name="reservations")
     customer_name = models.CharField(max_length=255, verbose_name="Имя клиента")
-    telephone = models.CharField(max_length=255, verbose_name="Телефон клиента")
+    telephone = PhoneNumberField(region='RU', verbose_name="Телефон клиента")
     number_of_guests = models.PositiveIntegerField(help_text="Количество гостей", verbose_name="Количество гостей")
     reservation_date = models.DateField(help_text="Дата брони", verbose_name="Дата брони", null=True, blank=True)
     reservation_start = models.TimeField(help_text="Время начала брони", verbose_name="Время начала брони", null=True, blank=True)

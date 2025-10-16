@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from django.conf.global_settings import AUTH_USER_MODEL
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -22,6 +23,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reservations",
+    "users",
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [
@@ -98,5 +101,6 @@ MEDIA_URL = "media/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
+AUTH_USER_MODEL = 'users.User'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
