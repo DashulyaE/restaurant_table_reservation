@@ -1,0 +1,37 @@
+{% extends 'reservations/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center">
+    <div class="card mb-4 box-shadow" style="max-width: 500px; width: 100%;">
+        <div class="card-body">
+            <form method="POST" action="" class="form-floating" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if form.is_bound and not form.is_valid %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger">
+                                    {% for error in field.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    {{ form.as_p }}
+                {% endif %}
+                <button type="submit" class="btn btn-lg btn-block btn-outline-primary">
+                  Зарегистрироваться
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

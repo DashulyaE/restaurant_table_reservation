@@ -47,10 +47,10 @@ class ReservationForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Reservation
-        exclude = ['original_reservation_date', 'original_reservation_start', 'original_reservation_and']
+        exclude = ["original_reservation_date", "original_reservation_start", "original_reservation_and"]
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        self.request = kwargs.pop("request", None)
         super().__init__(*args, **kwargs)
 
         # Заполняем выборы дат и времени
@@ -59,14 +59,14 @@ class ReservationForm(StyleFormMixin, ModelForm):
         self.fields["reservation_and"].choices = [(time, time) for time in get_time_slots()]
 
         # Устанавливаем queryset для ресторана
-        if 'restaurant' in self.data:
+        if "restaurant" in self.data:
             try:
-                restaurant_id = int(self.data.get('restaurant'))
+                restaurant_id = int(self.data.get("restaurant"))
                 self.fields["restaurant"].queryset = Restaurant.objects.filter(pk=restaurant_id)
                 self.fields["restaurant"].initial = restaurant_id
             except (ValueError, TypeError):
                 self.fields["restaurant"].queryset = Restaurant.objects.all()
-        elif hasattr(self, 'instance') and self.instance.pk:
+        elif hasattr(self, "instance") and self.instance.pk:
             self.fields["restaurant"].queryset = Restaurant.objects.filter(pk=self.instance.restaurant.pk)
             self.fields["restaurant"].initial = self.instance.restaurant.pk
         else:
@@ -79,17 +79,17 @@ class ReservationForm(StyleFormMixin, ModelForm):
         if not self.request:
             return
         data = self.request.GET
-        restaurant_id = data.get('restaurant')
-        date = data.get('reservation_date')
-        start_time = data.get('reservation_start')
-        end_time = data.get('reservation_and')
+        restaurant_id = data.get("restaurant")
+        date = data.get("reservation_date")
+        start_time = data.get("reservation_start")
+        end_time = data.get("reservation_and")
 
         if restaurant_id and date and start_time and end_time:
-            self.fields['table'].queryset = self.get_available_tables(restaurant_id, date, start_time, end_time)
+            self.fields["table"].queryset = self.get_available_tables(restaurant_id, date, start_time, end_time)
         elif restaurant_id:
-            self.fields['table'].queryset = Table.objects.filter(restaurant_id=restaurant_id)
+            self.fields["table"].queryset = Table.objects.filter(restaurant_id=restaurant_id)
         else:
-            self.fields['table'].queryset = Table.objects.none()
+            self.fields["table"].queryset = Table.objects.none()
 
     def get_available_tables(self, restaurant_id, date, start_time, end_time):
         tables = Table.objects.filter(restaurant_id=restaurant_id)
@@ -108,6 +108,7 @@ class ReservationForm(StyleFormMixin, ModelForm):
 
         if start_time_str and end_time_str:
             from datetime import datetime
+
             start_time = datetime.strptime(start_time_str, "%H:%M").time()
             end_time = datetime.strptime(end_time_str, "%H:%M").time()
 
@@ -120,4 +121,4 @@ class ReservationStatusForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Reservation
-        fields = ['status']
+        fields = ["status"]
