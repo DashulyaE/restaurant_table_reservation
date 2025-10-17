@@ -13,8 +13,10 @@
         <p class="mb-0"><strong>Статус:</strong> {{ reservation.get_status_display }}</p>
       </div>
       <div class="btn-group" role="group" aria-label="Действия">
-        <a href="{% url 'reservations:reservation_update' reservation.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
-        <a href="{% url 'reservations:reservation_delete' reservation.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'reservations:reservation_update' reservation.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+          <a href="{% url 'reservations:reservation_delete' reservation.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+        {% endif %}
       </div>
     </div>
   {% empty %}

@@ -1,6 +1,8 @@
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
+from users.models import User
+
 
 class Restaurant(models.Model):
     """Модель класса ресторан"""
@@ -19,6 +21,14 @@ class Restaurant(models.Model):
         verbose_name="План рассадки",
         help_text="Загрузите план рассадки",
         default="seating_plans/photo/default.jpg",
+    )
+    owner = models.ForeignKey(
+        User,
+        verbose_name="Владелец",
+        help_text="Укажите владельца",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:
@@ -42,6 +52,14 @@ class Table(models.Model):
     )
     number = models.CharField(max_length=50, verbose_name="Номер стола", help_text="Укажите номер стола")
     size = models.PositiveIntegerField(verbose_name="Кол-во мест", help_text="Количество мест за столиком")
+    owner = models.ForeignKey(
+        User,
+        verbose_name="Владелец",
+        help_text="Укажите владельца",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
 
     class Meta:
         verbose_name = "Стол"
@@ -81,6 +99,14 @@ class Reservation(models.Model):
     ]
     status = models.CharField(
         max_length=20, choices=status_choices, default="pending", help_text="Статус брони", verbose_name="Статус брони"
+    )
+    owner = models.ForeignKey(
+        User,
+        verbose_name="Владелец",
+        help_text="Укажите владельца",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:

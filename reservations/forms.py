@@ -25,7 +25,7 @@ class RestaurantForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Restaurant
-        fields = "__all__"
+        exclude = ["owner"]
 
 
 class TableForm(StyleFormMixin, ModelForm):
@@ -33,7 +33,7 @@ class TableForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Table
-        fields = "__all__"
+        exclude = ["owner"]
 
 
 class ReservationForm(StyleFormMixin, ModelForm):
@@ -47,7 +47,7 @@ class ReservationForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Reservation
-        exclude = ["original_reservation_date", "original_reservation_start", "original_reservation_and"]
+        exclude = ["original_reservation_date", "original_reservation_start", "original_reservation_and", "owner"]
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)

@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -18,13 +19,19 @@ class RestaurantDetailView(DetailView):
     model = Restaurant
 
 
-class RestaurantCreateView(CreateView):
+class RestaurantCreateView(CreateView, LoginRequiredMixin):
     model = Restaurant
     form_class = RestaurantForm
     success_url = reverse_lazy("reservations:restaurants_list")
 
+    def form_valid(self, form):
+        restaurant = form.save()
+        user = self.request.user
+        restaurant.owner = user
+        restaurant.save()
+        return super().form_valid(form)
 
-class RestaurantUpdateView(UpdateView):
+class RestaurantUpdateView(UpdateView, LoginRequiredMixin):
     model = Restaurant
     form_class = RestaurantForm
     success_url = reverse_lazy("reservations:restaurants_list")
@@ -33,13 +40,13 @@ class RestaurantUpdateView(UpdateView):
         return reverse("reservations:restaurant_detail", args=[self.kwargs.get("pk")])
 
 
-class RestaurantDeleteView(DeleteView):
+class RestaurantDeleteView(DeleteView, LoginRequiredMixin):
     model = Restaurant
     success_url = reverse_lazy("reservations:restaurants_list")
     template_name = "reservations/restaurant_confirm_delete.html"
 
 
-class TableListView(ListView):
+class TableListView(ListView, LoginRequiredMixin):
     model = Table
 
 
@@ -47,13 +54,19 @@ class TableDetailView(DetailView):
     model = Table
 
 
-class TableCreateView(CreateView):
+class TableCreateView(CreateView, LoginRequiredMixin):
     model = Table
     form_class = TableForm
     success_url = reverse_lazy("reservations:table_list")
 
+    def form_valid(self, form):
+        table = form.save()
+        user = self.request.user
+        table.owner = user
+        table.save()
+        return super().form_valid(form)
 
-class TableUpdateView(UpdateView):
+class TableUpdateView(UpdateView, LoginRequiredMixin):
     model = Table
     form_class = TableForm
     success_url = reverse_lazy("reservations:table_list")
@@ -62,13 +75,13 @@ class TableUpdateView(UpdateView):
         return reverse("reservations:table_detail", args=[self.kwargs.get("pk")])
 
 
-class TableDeleteView(DeleteView):
+class TableDeleteView(DeleteView, LoginRequiredMixin):
     model = Table
     success_url = reverse_lazy("reservations:table_list")
     template_name = "reservations/table_confirm_delete.html"
 
 
-class ReservationListView(ListView):
+class ReservationListView(ListView, LoginRequiredMixin):
     model = Reservation
 
     def get_queryset(self):
@@ -84,7 +97,7 @@ class ReservationDetailView(DetailView):
     model = Reservation
 
 
-class ReservationCreateView(CreateView):
+class ReservationCreateView(CreateView, LoginRequiredMixin):
     model = Reservation
     form_class = ReservationForm
     success_url = reverse_lazy("reservations:reservation_list")
@@ -100,6 +113,10 @@ class ReservationCreateView(CreateView):
         form.instance.original_reservation_date = form.instance.reservation_date
         form.instance.original_reservation_start = form.instance.reservation_start
         form.instance.original_reservation_and = form.instance.reservation_and
+        table = form.save(commit=False)
+        table.owner = self.request.user
+        table.save()
+
         return super().form_valid(form)
 
     def get_initial(self):
@@ -149,13 +166,13 @@ class ReservationCreateView(CreateView):
         return context
 
 
-class ReservationDeleteView(DeleteView):
+class ReservationDeleteView(DeleteView, LoginRequiredMixin):
     model = Reservation
     success_url = reverse_lazy("reservations:reservation_list")
     template_name = "reservations/reservation_confirm_delete.html"
 
 
-class ReservationUpdateView(UpdateView):
+class ReservationUpdateView(UpdateView, LoginRequiredMixin):
     model = Reservation
     form_class = ReservationStatusForm
     success_url = reverse_lazy("reservations:reservation_list")

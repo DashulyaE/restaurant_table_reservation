@@ -1,7 +1,9 @@
 {% extends 'reservations/base.html' %}
 {% block content %}
 <div class="mb-4 d-flex justify-content-end">
-  <a href="{% url 'reservations:restaurant_create' %}" class="btn btn-success fs-5">Добавить ресторан</a>
+  {% if user.is_authenticated %}
+    <a href="{% url 'reservations:restaurant_create' %}" class="btn btn-success fs-5">Добавить ресторан</a>
+  {% endif %}
 </div>
 <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
   {% for restaurant in object_list %}
@@ -21,13 +23,17 @@
         <ul>
           <div class="d-flex gap-2">
             <a href="{% url 'reservations:restaurant_detail' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Узнать о ресторане</a>
-            <a href="{% url 'reservations:reservation_create' %}?restaurant={{ restaurant.pk }}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'reservations:reservation_create' %}?restaurant={{ restaurant.pk }}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
+            {% endif %}
           </div>
         </ul>
         <ul>
           <div class="d-flex gap-2">
-            <a href="{% url 'reservations:restaurant_update' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Редактировать</a>
-            <a href="{% url 'reservations:restaurant_delete' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Удалить</a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'reservations:restaurant_update' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Редактировать</a>
+              <a href="{% url 'reservations:restaurant_delete' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Удалить</a>
+            {% endif %}
           </div>
         </ul>
       </div>
