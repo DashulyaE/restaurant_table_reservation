@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reservations",
-    "users",
+    "users.apps.UsersConfig",
     "phonenumber_field",
 ]
 
