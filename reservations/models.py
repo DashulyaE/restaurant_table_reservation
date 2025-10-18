@@ -35,6 +35,11 @@ class Restaurant(models.Model):
         verbose_name = "Ресторан"
         verbose_name_plural = "Рестораны"
         ordering = ["name"]
+        permissions = [
+            ('can_edit_restaurant', 'Может редактировать свой ресторан'),
+            ('can_delete_restaurant', 'Может удалить свой ресторан'),
+            ('can_add_restaurant', 'Может создать ресторан'),
+        ]
 
     def __str__(self):
         return self.name
@@ -65,6 +70,12 @@ class Table(models.Model):
         verbose_name = "Стол"
         verbose_name_plural = "Столы"
         ordering = ["restaurant", "size"]
+        permissions = [
+            ('can_view_table', 'Может просматривать список своих столов'),
+            ('can_delete_table', 'Может удалить свой стол'),
+            ('can_add_table', 'Может создать стол'),
+            ('can_edit_table', 'Может редактировать свой стол'),
+        ]
 
     def __str__(self):
         return f"Стол {self.number} в {self.restaurant.name}"
@@ -113,6 +124,11 @@ class Reservation(models.Model):
         verbose_name = "Бронь>"
         verbose_name_plural = "Брони"
         ordering = ["reservation_date", "reservation_start"]
+        permissions = [
+            ('can_change_reservation', 'Может редактировать бронь'),
+            ('can_view_reservations', 'Может просматривать брони своего ресторана'),
+            ('can_delete_reservations', 'Может удалить бронь'),
+        ]
 
     def __str__(self):
         return f"Резервирование на имя {self.customer_name} стола {self.reservation_date}"
