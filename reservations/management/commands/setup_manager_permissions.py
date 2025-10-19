@@ -8,9 +8,6 @@ class Command(BaseCommand):
         group_name = 'manager'
         permissions_codenames = [
             'can_view_table',
-            'can_delete_table',
-            'can_add_table',
-            'can_edit_table',
             'can_change_reservation',
             'can_view_reservations',
             'can_delete_reservations',

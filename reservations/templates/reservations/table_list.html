@@ -1,7 +1,7 @@
 {% extends 'reservations/base.html' %}
 {% block content %}
 <div class="mb-4 d-flex justify-content-end">
-  {% if user.is_authenticated %}
+  {% if can_view_table %}
     <a href="{% url 'reservations:table_create' %}" class="btn btn-success fs-5">Добавить стол</a>
   {% endif %}
 </div>
@@ -15,7 +15,7 @@
         <p class="mb-0">Мест: {{ table.size }}</p>
       </div>
       <div class="btn-group" role="group" aria-label="Действия">
-        {% if user.is_authenticated %}
+        {% if can_view_table %}
           <a href="{% url 'reservations:table_update' table.pk %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
           <a href="{% url 'reservations:table_delete' table.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
         {% endif %}

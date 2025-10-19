@@ -1,7 +1,7 @@
 {% extends 'reservations/base.html' %}
 {% block content %}
 <div class="mb-4 d-flex justify-content-end">
-  {% if user == restaurant.owner %}
+  {% if user.is_authenticated and is_owner %}
     <a href="{% url 'reservations:restaurant_create' %}" class="btn btn-success fs-5">Добавить ресторан</a>
   {% endif %}
 </div>
@@ -30,7 +30,7 @@
         </ul>
         <ul>
           <div class="d-flex gap-2">
-            {% if user.is_authenticated %}
+            {% if user.is_authenticated and is_owner %}
               <a href="{% url 'reservations:restaurant_update' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Редактировать</a>
               <a href="{% url 'reservations:restaurant_delete' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Удалить</a>
             {% endif %}

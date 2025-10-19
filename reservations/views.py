@@ -1,6 +1,7 @@
 from datetime import timedelta, datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -11,15 +12,26 @@ from reservations.models import Restaurant, Table, Reservation
 from reservations.utils import get_date_list, get_time_slots
 
 
+
+def contacts(request):
+    return render(request, 'reservations/contacts.html')
+
+
 class RestaurantListView(ListView):
     model = Restaurant
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['is_owner'] = user.groups.filter(name='owner').exists()
+        return context
 
 class RestaurantDetailView(DetailView):
     model = Restaurant
 
 
 class RestaurantCreateView(CreateView, LoginRequiredMixin):
+    permission_required = 'reservations.can_add_restaurant'
     model = Restaurant
     form_class = RestaurantForm
     success_url = reverse_lazy("reservations:restaurants_list")
@@ -32,22 +44,54 @@ class RestaurantCreateView(CreateView, LoginRequiredMixin):
         return super().form_valid(form)
 
 class RestaurantUpdateView(UpdateView, LoginRequiredMixin):
+    permission_required = 'reservations.can_edit_restaurant'
     model = Restaurant
     form_class = RestaurantForm
     success_url = reverse_lazy("reservations:restaurants_list")
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if self.request.user != obj.owner:
+            raise PermissionDenied
+        return obj
 
     def get_success_url(self):
         return reverse("reservations:restaurant_detail", args=[self.kwargs.get("pk")])
 
 
 class RestaurantDeleteView(DeleteView, LoginRequiredMixin):
+    permission_required = 'reservations.can_delete_restaurant'
     model = Restaurant
     success_url = reverse_lazy("reservations:restaurants_list")
     template_name = "reservations/restaurant_confirm_delete.html"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if self.request.user != obj.owner:
+            raise PermissionDenied
+        return obj
 
 class TableListView(ListView, LoginRequiredMixin):
     model = Table
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        user = self.request.user
+        has_permission = user.has_perm('reservations.can_view_table')
+        is_owner = user.groups.filter(name='owner').exists()
+
+        if not (has_permission or is_owner):
+            return qs.none()
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        context['can_view_table'] = (
+            user.is_superuser or
+            user.groups.filter(name__in=['manager', 'owner']).exists()
+        )
+        return context
 
 
 class TableDetailView(DetailView):
@@ -71,6 +115,12 @@ class TableUpdateView(UpdateView, LoginRequiredMixin):
     form_class = TableForm
     success_url = reverse_lazy("reservations:table_list")
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user:
+            raise PermissionDenied
+        return obj
+
     def get_success_url(self):
         return reverse("reservations:table_detail", args=[self.kwargs.get("pk")])
 
@@ -80,12 +130,21 @@ class TableDeleteView(DeleteView, LoginRequiredMixin):
     success_url = reverse_lazy("reservations:table_list")
     template_name = "reservations/table_confirm_delete.html"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user:
+            raise PermissionDenied
+        return obj
+
 
 class ReservationListView(ListView, LoginRequiredMixin):
     model = Reservation
 
     def get_queryset(self):
         qs = super().get_queryset()
+        user = self.request.user
+        if user.groups.filter(name='user').exists() and not user.is_superuser:
+            qs = qs.filter(owner=user)
         for reservation in qs:
             reservation.display_reservation_date = reservation.original_reservation_date
             reservation.display_reservation_start = reservation.original_reservation_start
@@ -104,12 +163,10 @@ class ReservationCreateView(CreateView, LoginRequiredMixin):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Передача request, чтобы форма могла получить параметры из GET
         kwargs["request"] = self.request
         return kwargs
 
     def form_valid(self, form):
-        # Перед сохранением заполняем поля дублей
         form.instance.original_reservation_date = form.instance.reservation_date
         form.instance.original_reservation_start = form.instance.reservation_start
         form.instance.original_reservation_and = form.instance.reservation_and
@@ -135,20 +192,17 @@ class ReservationCreateView(CreateView, LoginRequiredMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Передача списка ресторанов
+        context['back_url'] = reverse('reservations:restaurants_list')
         context["restaurants"] = Restaurant.objects.all()
 
-        # Получение параметров из GET-запроса
         restaurant_id = self.request.GET.get("restaurant")
         date = self.request.GET.get("reservation_date")
         start_time = self.request.GET.get("reservation_start")
         end_time = self.request.GET.get("reservation_and")
 
-        # Передача списков для шаблона
         context["date_list"] = get_date_list()
         context["time_slots"] = get_time_slots()
 
-        # Фильтрация столов по выбранным параметрам
         if restaurant_id and date and start_time and end_time:
             tables_qs = Table.objects.filter(restaurant_id=restaurant_id)
             reserved_tables = Reservation.objects.filter(
@@ -171,15 +225,30 @@ class ReservationDeleteView(DeleteView, LoginRequiredMixin):
     success_url = reverse_lazy("reservations:reservation_list")
     template_name = "reservations/reservation_confirm_delete.html"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        if not (user.is_superuser or obj.owner == user or user.groups.filter(name__in=['manager', 'owner']).exists()):
+            raise PermissionDenied
+        return obj
+
 
 class ReservationUpdateView(UpdateView, LoginRequiredMixin):
+    permission_required = 'reservations.can_change_reservation'
     model = Reservation
     form_class = ReservationStatusForm
     success_url = reverse_lazy("reservations:reservation_list")
     template_name = "reservations/reservation_status_update.html"
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        if user.groups.filter(name='user').exists() and not user.is_superuser:
+            if obj.owner != user:
+                raise PermissionDenied
+        return obj
+
     def form_valid(self, form):
-        # Проверяем, что статус меняется на 'cancelled'
         if form.instance.status == "cancelled":
             self.object.reservation_date = None
             self.object.reservation_start = None
@@ -189,9 +258,7 @@ class ReservationUpdateView(UpdateView, LoginRequiredMixin):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        # Проверяем статус брони
         if self.object.status == "cancelled":
-            # делаем все поля недоступными
             for field in form.fields.values():
                 field.disabled = True
         return form
