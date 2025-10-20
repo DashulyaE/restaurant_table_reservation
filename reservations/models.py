@@ -30,6 +30,14 @@ class Restaurant(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    manager = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='managed_restaurants',
+        verbose_name='Менеджер'
+    )
 
     class Meta:
         verbose_name = "Ресторан"
