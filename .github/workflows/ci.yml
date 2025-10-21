@@ -31,8 +31,8 @@ jobs:
       NAME: ${{ secrets.NAME }}
       USER: ${{ secrets.USER }}
       PASSWORD: ${{ secrets.PASSWORD }}
-      HOST: ${{ secrets.HOST }}  # или localhost
-      PORT: ${{ secrets.PORT }}  # например, 5432
+      HOST: ${{ secrets.HOST }}
+      PORT: ${{ secrets.PORT }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
       EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
       EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
@@ -98,21 +98,21 @@ jobs:
           set -e
           echo "Starting deployment..."
           cd ${{ secrets.DEPLOY_DIR }}
-          
-          # Проверяем, есть ли репозиторий
+
+          # Клонируем репозиторий, если его нет
           if [ ! -d ".git" ]; then
-            # Клонируем репозиторий, если его нет
-            git clone https://github.com/DashulyaE/restaurant_table_reservation.git .  # точка означает текущая папка
+            git clone https://github.com/restaurant_table_reservation.git .  # замените на ваш репозиторий
+            git checkout feature  # или нужную ветку
           fi
-          
+
           # Обновляем проект
-          git pull origin feature
-          
+          git pull origin main
+
           # Создаем файл .env
           cat > .env << EOL
           DEBUG=${{ secrets.DEBUG }}
-          DEPLOY_DIR=${{ secrets.DEPLOY_DIR }}
-          EMAIL_HOST="${{ secrets.EMAIL_HOST }}"
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          EMAIL_HOST=${{ secrets.EMAIL_HOST }}
           EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
           EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
           EMAIL_PORT=${{ secrets.EMAIL_PORT }}
@@ -120,20 +120,19 @@ jobs:
           NAME=${{ secrets.NAME }}
           PASSWORD=${{ secrets.PASSWORD }}
           PORT=${{ secrets.PORT }}
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
-          USER=${{ secrets.USER }}
+          DEPLOY_DIR=${{ secrets.DEPLOY_DIR }}
           EOL
-          
+
           # Устанавливаем права
           sudo chmod 600 .env
           sudo chmod -R u+rwX ${{ secrets.DEPLOY_DIR }}
-          
+
           # Настраиваем git
           git config --global --add safe.directory ${{ secrets.DEPLOY_DIR }}
-          
+
           # Обновляем проект
           git pull
-          
-          # Запускаем контейнеры на сервере
+
+          # Запускаем контейнеры
           docker compose --env-file .env up -d
           EOF
