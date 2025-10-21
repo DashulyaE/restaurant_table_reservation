@@ -1,14 +1,15 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 
+
 class Command(BaseCommand):
-    help = 'Назначает права группе user'
+    help = "Назначает права группе user"
 
     def handle(self, *args, **kwargs):
-        group_name = 'user'
+        group_name = "user"
         permissions_codenames = [
-            'can_change_reservation',
-            'can_view_reservations',
+            "can_change_reservation",
+            "can_view_reservations",
         ]
 
         group, created = Group.objects.get_or_create(name=group_name)

@@ -35,8 +35,8 @@ class Restaurant(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='managed_restaurants',
-        verbose_name='Менеджер'
+        related_name="managed_restaurants",
+        verbose_name="Менеджер",
     )
 
     class Meta:
@@ -44,9 +44,9 @@ class Restaurant(models.Model):
         verbose_name_plural = "Рестораны"
         ordering = ["name"]
         permissions = [
-            ('can_edit_restaurant', 'Может редактировать свой ресторан'),
-            ('can_delete_restaurant', 'Может удалить свой ресторан'),
-            ('can_add_restaurant', 'Может создать ресторан'),
+            ("can_edit_restaurant", "Может редактировать свой ресторан"),
+            ("can_delete_restaurant", "Может удалить свой ресторан"),
+            ("can_add_restaurant", "Может создать ресторан"),
         ]
 
     def __str__(self):
@@ -79,14 +79,14 @@ class Table(models.Model):
         verbose_name_plural = "Столы"
         ordering = ["restaurant", "size"]
         permissions = [
-            ('can_view_table', 'Может просматривать список своих столов'),
-            ('can_delete_table', 'Может удалить свой стол'),
-            ('can_add_table', 'Может создать стол'),
-            ('can_edit_table', 'Может редактировать свой стол'),
+            ("can_view_table", "Может просматривать список своих столов"),
+            ("can_delete_table", "Может удалить свой стол"),
+            ("can_add_table", "Может создать стол"),
+            ("can_edit_table", "Может редактировать свой стол"),
         ]
 
     def __str__(self):
-        return f"Стол {self.number} в {self.restaurant.name}"
+        return f"Стол {self.number} в {self.restaurant.name} на {self.size} человек"
 
 
 class Reservation(models.Model):
@@ -127,15 +127,21 @@ class Reservation(models.Model):
         null=True,
         on_delete=models.SET_NULL,
     )
+    note = models.TextField(
+        verbose_name="Примечание",
+        help_text="Дополнительная информация о бронировании",
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         verbose_name = "Бронь>"
         verbose_name_plural = "Брони"
         ordering = ["reservation_date", "reservation_start"]
         permissions = [
-            ('can_change_reservation', 'Может редактировать бронь'),
-            ('can_view_reservations', 'Может просматривать брони своего ресторана'),
-            ('can_delete_reservations', 'Может удалить бронь'),
+            ("can_change_reservation", "Может редактировать бронь"),
+            ("can_view_reservations", "Может просматривать брони своего ресторана"),
+            ("can_delete_reservations", "Может удалить бронь"),
         ]
 
     def __str__(self):

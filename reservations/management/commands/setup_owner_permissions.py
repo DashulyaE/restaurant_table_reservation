@@ -1,22 +1,23 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 
+
 class Command(BaseCommand):
-    help = 'Назначает права группе owner'
+    help = "Назначает права группе owner"
 
     def handle(self, *args, **kwargs):
-        group_name = 'owner'
+        group_name = "owner"
         permissions_codenames = [
-            'can_edit_restaurant',
-            'can_delete_restaurant',
-            'can_add_restaurant',
-            'can_view_table',
-            'can_delete_table',
-            'can_add_table',
-            'can_edit_table',
-            'can_change_reservation',
-            'can_view_reservations',
-            'can_delete_reservations',
+            "can_edit_restaurant",
+            "can_delete_restaurant",
+            "can_add_restaurant",
+            "can_view_table",
+            "can_delete_table",
+            "can_add_table",
+            "can_edit_table",
+            "can_change_reservation",
+            "can_view_reservations",
+            "can_delete_reservations",
         ]
 
         group, created = Group.objects.get_or_create(name=group_name)

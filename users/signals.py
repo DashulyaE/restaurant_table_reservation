@@ -5,8 +5,9 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 @receiver(post_save, sender=User)
 def add_user_to_group(sender, instance, created, **kwargs):
     if created:
-        group, _ = Group.objects.get_or_create(name='user')
+        group, _ = Group.objects.get_or_create(name="user")
         instance.groups.add(group)

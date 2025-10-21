@@ -1,8 +1,8 @@
-from django.core.exceptions import ValidationError
-from django.forms import ModelForm, BooleanField, ModelChoiceField, Select, ChoiceField
+from django.forms import ModelForm, BooleanField, ModelChoiceField, ChoiceField
 
 from reservations.models import Restaurant, Table, Reservation
 from reservations.utils import get_date_list, get_time_slots
+from django import forms
 
 
 class StyleFormMixin:
@@ -37,13 +37,14 @@ class TableForm(StyleFormMixin, ModelForm):
 
 
 class ReservationForm(StyleFormMixin, ModelForm):
-    """Форма для создания резерва стола"""
+    """Форма для создания резерва стола с проверкой вместимости"""
 
     reservation_date = ChoiceField(label="Дата", choices=[])
     reservation_start = ChoiceField(label="Время начала", choices=[])
     reservation_and = ChoiceField(label="Время окончания", choices=[])
     table = ModelChoiceField(queryset=Table.objects.none(), label="Стол")
-    restaurant = ModelChoiceField(queryset=Restaurant.objects.all(), label="Ресторан")  # добавляем поле
+    restaurant = ModelChoiceField(queryset=Restaurant.objects.all(), label="Ресторан")
+    number_of_guests = forms.IntegerField(label="Количество гостей", min_value=1)
 
     class Meta:
         model = Reservation
@@ -75,6 +76,18 @@ class ReservationForm(StyleFormMixin, ModelForm):
         # Обновляем список доступных столов
         self.update_available_tables()
 
+        # Получаем вместимость выбранного стола для проверки
+        self._table_capacity = None
+        if "table" in self.data:
+            try:
+                table_id = int(self.data.get("table"))
+                table_obj = Table.objects.get(pk=table_id)
+                self._table_capacity = table_obj.size
+            except (ValueError, Table.DoesNotExist):
+                self._table_capacity = None
+        elif hasattr(self, "instance") and self.instance.pk:
+            self._table_capacity = self.instance.table.size
+
     def update_available_tables(self):
         if not self.request:
             return
@@ -91,6 +104,15 @@ class ReservationForm(StyleFormMixin, ModelForm):
         else:
             self.fields["table"].queryset = Table.objects.none()
 
+        # Обновляем вместимость при изменении таблицы
+        if "table" in self.data:
+            try:
+                table_id = int(self.data.get("table"))
+                table_obj = Table.objects.get(pk=table_id)
+                self._table_capacity = table_obj.size
+            except (ValueError, Table.DoesNotExist):
+                self._table_capacity = None
+
     def get_available_tables(self, restaurant_id, date, start_time, end_time):
         tables = Table.objects.filter(restaurant_id=restaurant_id)
         reserved_tables = Reservation.objects.filter(
@@ -105,15 +127,31 @@ class ReservationForm(StyleFormMixin, ModelForm):
         cleaned_data = super().clean()
         start_time_str = cleaned_data.get("reservation_start")
         end_time_str = cleaned_data.get("reservation_and")
+        number_of_guests = cleaned_data.get("number_of_guests")
+        table = cleaned_data.get("table")
 
+        # Проверка времени
         if start_time_str and end_time_str:
             from datetime import datetime
 
             start_time = datetime.strptime(start_time_str, "%H:%M").time()
             end_time = datetime.strptime(end_time_str, "%H:%M").time()
-
             if end_time <= start_time:
                 self.add_error("reservation_and", "Время окончания не должно быть меньше или равно времени начала.")
+
+        # Проверка вместимости
+        if table and number_of_guests:
+            if self._table_capacity is None:
+                # Попытка обновить вместимость, если не удалось
+                try:
+                    table_obj = Table.objects.get(pk=table.pk)
+                    self._table_capacity = table_obj.size
+                except Table.DoesNotExist:
+                    self._table_capacity = None
+            if self._table_capacity is not None and number_of_guests > self._table_capacity:
+                self.add_error(
+                    "number_of_guests", f"Максимальное количество гостей для этого стола: {self._table_capacity}"
+                )
 
 
 class ReservationStatusForm(StyleFormMixin, ModelForm):

@@ -1,5 +1,4 @@
 import secrets
-from django.contrib.auth import login
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
@@ -13,7 +12,7 @@ from .models import User
 class RegisterView(CreateView):
     model = User
     form_class = UserRegisterForm
-    success_url = reverse_lazy('users:login')
+    success_url = reverse_lazy("users:login")
 
     def form_valid(self, form):
         user = form.save()
@@ -30,6 +29,7 @@ class RegisterView(CreateView):
             recipient_list=[user.email],
         )
         return super().form_valid(form)
+
 
 def email_verification(request, token):
     """Подтверждение почты"""

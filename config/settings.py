@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-from django.conf.global_settings import AUTH_USER_MODEL, LOGOUT_REDIRECT_URL, LOGIN_REDIRECT_URL
 from dotenv import load_dotenv
 
 load_dotenv(override=True)

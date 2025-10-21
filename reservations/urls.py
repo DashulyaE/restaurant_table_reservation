@@ -1,5 +1,5 @@
 from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path
 
 from config import settings
 from reservations import views
@@ -40,5 +40,5 @@ urlpatterns = [
     path("reservation/create", ReservationCreateView.as_view(), name="reservation_create"),
     path("reservation/<int:pk>/delete/", ReservationDeleteView.as_view(), name="reservation_delete"),
     path("reservation/<int:pk>/update/", ReservationUpdateView.as_view(), name="reservation_update"),
-    path('contacts/', views.contacts, name='contacts'),
+    path("contacts/", views.contacts, name="contacts"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

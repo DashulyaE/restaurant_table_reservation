@@ -9,8 +9,8 @@
             <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'reservations:contacts' %}">Контакты </a>
             {% if user.is_authenticated %}
                 <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'reservations:table_list' %}">Столы</a>
+                <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'reservations:reservation_list' %}">Брони</a>
             {% endif %}
-            <a class="me-3 py-2 link-body-emphasis text-decoration-none" href="{% url 'reservations:reservation_list' %}">Брони</a>
             {% if user.is_authenticated %}
             <form method="post" action="{% url 'users:logout' %}" style="display: inline">
                 {% csrf_token %}
