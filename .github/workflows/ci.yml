@@ -101,7 +101,7 @@ jobs:
 
           # Клонируем репозиторий, если его нет
           if [ ! -d ".git" ]; then
-            git clone https://github.com/restaurant_table_reservation.git .  # замените на ваш репозиторий
+            git clone https://github.com/DashulyaE/restaurant_table_reservation.git .  # замените на ваш репозиторий
             git checkout feature  # или нужную ветку
           fi
 
