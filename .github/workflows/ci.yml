@@ -34,8 +34,12 @@ jobs:
       HOST: ${{ secrets.HOST }}
       PORT: ${{ secrets.PORT }}
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+      DEBUG: ${{ secrets.DEBUG }}
+      DEPLOY_DIR: ${{ secrets.DEPLOY_DIR }}
+      EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
       EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+      EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+      EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
 
     steps:
       - name: Checkout code
@@ -98,17 +102,11 @@ jobs:
           set -e
           echo "Starting deployment..."
           cd ${{ secrets.DEPLOY_DIR }}
-
-          echo "Текущая директория:"
-          pwd
-          echo "Содержимое:"
-          ls -la
+          
+          # Проверяем, есть ли репозиторий
           if [ ! -d ".git" ]; then
-            echo "Клонируем репозиторий..."
-            git clone https://github.com/DashulyaE/restaurant_table_reservation.git . 
-            git checkout feature
-          else
-            echo "Репозиторий уже есть."
+            # Клонируем репозиторий, если его нет
+            git clone https://github.com/DashulyaE/habit_tracker.git .  # точка означает текущая папка
           fi
-
+                  
           EOF
