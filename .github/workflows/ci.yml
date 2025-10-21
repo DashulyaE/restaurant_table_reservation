@@ -105,34 +105,4 @@ jobs:
             git checkout feature  # или нужную ветку
           fi
 
-          # Обновляем проект
-          git pull origin main
-
-          # Создаем файл .env
-          cat > .env << EOL
-          DEBUG=${{ secrets.DEBUG }}
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
-          EMAIL_HOST=${{ secrets.EMAIL_HOST }}
-          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
-          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
-          EMAIL_PORT=${{ secrets.EMAIL_PORT }}
-          HOST=${{ secrets.HOST }}
-          NAME=${{ secrets.NAME }}
-          PASSWORD=${{ secrets.PASSWORD }}
-          PORT=${{ secrets.PORT }}
-          DEPLOY_DIR=${{ secrets.DEPLOY_DIR }}
-          EOL
-
-          # Устанавливаем права
-          sudo chmod 600 .env
-          sudo chmod -R u+rwX ${{ secrets.DEPLOY_DIR }}
-
-          # Настраиваем git
-          git config --global --add safe.directory ${{ secrets.DEPLOY_DIR }}
-
-          # Обновляем проект
-          git pull
-
-          # Запускаем контейнеры
-          docker compose --env-file .env up -d
           EOF
