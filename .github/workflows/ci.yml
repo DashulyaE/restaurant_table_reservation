@@ -98,7 +98,7 @@ jobs:
           set -e
           echo "Starting deployment..."
           cd ${{ secrets.DEPLOY_DIR }}
-          
+          git config --global --add safe.directory "$DEPLOY_DIR"
           # Проверяем, есть ли репозиторий
           if [ ! -d ".git" ]; then
             # Клонируем репозиторий, если его нет
