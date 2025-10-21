@@ -96,44 +96,15 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           set -e
-          echo "Starting deployment..."
-          cd ${{ secrets.DEPLOY_DIR }}
+          DEPLOY_DIR="${{ secrets.DEPLOY_DIR }}"
+          echo "Adding safe.directory..."
           git config --global --add safe.directory "$DEPLOY_DIR"
-          # Проверяем, есть ли репозиторий
+          cd "$DEPLOY_DIR"
+          # Проверка и клонирование
           if [ ! -d ".git" ]; then
-            # Клонируем репозиторий, если его нет
-            git clone https://github.com/DashulyaE/restaurant_table_reservation.git .  # точка означает текущая папка
+            git clone https://github.com/DashulyaE/restaurant_table_reservation.git .
           fi
           
-          # Обновляем проект
           git pull origin feature
           
-          # Создаем файл .env
-          cat > .env << EOL
-          DEBUG=${{ secrets.DEBUG }}
-          DEPLOY_DIR=${{ secrets.DEPLOY_DIR }}
-          EMAIL_HOST="${{ secrets.EMAIL_HOST }}"
-          EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
-          EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
-          EMAIL_PORT=${{ secrets.EMAIL_PORT }}
-          HOST=${{ secrets.HOST }}
-          NAME=${{ secrets.NAME }}
-          PASSWORD=${{ secrets.PASSWORD }}
-          PORT=${{ secrets.PORT }}
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
-          USER=${{ secrets.USER }}
-          EOL
-          
-          # Устанавливаем права
-          sudo chmod 600 .env
-          sudo chmod -R u+rwX ${{ secrets.DEPLOY_DIR }}
-          
-          # Настраиваем git
-          git config --global --add safe.directory ${{ secrets.DEPLOY_DIR }}
-          
-          # Обновляем проект
-          git pull
-          
-          # Запускаем контейнеры на сервере
-          docker compose --env-file .env up -d
           EOF
