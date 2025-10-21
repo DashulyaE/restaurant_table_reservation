@@ -108,5 +108,5 @@ jobs:
             # Клонируем репозиторий, если его нет
             git clone https://github.com/DashulyaE/restaurant_table_reservation.git .  # точка означает текущая папка
           fi
-                  
+          git pull origin feature
           EOF
