@@ -115,6 +115,8 @@ jobs:
           # Создаем файл .env
           cat > .env << EOL
           DEBUG=${{ secrets.DEBUG }}
+          DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}
+          DEPLOY_DIR=${{ secrets.DEPLOY_DIR }}
           EMAIL_HOST="${{ secrets.EMAIL_HOST }}"
           EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}
           EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}
