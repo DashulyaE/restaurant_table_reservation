@@ -103,6 +103,9 @@ jobs:
           echo "Starting deployment..."
           cd ${{ secrets.DEPLOY_DIR }}
           
+          # Добавляем папку в список безопасных
+          git config --global --add safe.directory ${{ secrets.DEPLOY_DIR }}
+          
           # Проверяем, есть ли репозиторий
           if [ ! -d ".git" ]; then
             # Клонируем репозиторий, если его нет
