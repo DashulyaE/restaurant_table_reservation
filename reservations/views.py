@@ -145,24 +145,20 @@ class ReservationListView(ListView, LoginRequiredMixin):
         qs = super().get_queryset()
         user = self.request.user
 
-        for reservation in qs:
-            reservation.display_reservation_date = reservation.original_reservation_date
-            reservation.display_reservation_start = reservation.original_reservation_start
-            reservation.display_reservation_and = reservation.original_reservation_and
-
-        # Если суперюзер — показываем все
         if user.is_superuser:
-            return qs
-
-        # Для группы 'user' — фильтр по владельцу
-        if user.groups.filter(name="user").exists():
+            pass
+        elif user.groups.filter(name='user').exists():
             qs = qs.filter(owner=user)
-
-        if user.groups.filter(name__in=['manager', 'owner']).exists():
+        elif user.groups.filter(name__in=['manager', 'owner']).exists():
             if user.groups.filter(name='manager').exists():
                 qs = qs.filter(restaurant__manager=user)
             else:
                 qs = qs.filter(restaurant__owner=user)
+
+        for reservation in qs:
+            reservation.display_reservation_date = reservation.original_reservation_date
+            reservation.display_reservation_start = reservation.original_reservation_start
+            reservation.display_reservation_and = reservation.original_reservation_and
 
         return qs
 
