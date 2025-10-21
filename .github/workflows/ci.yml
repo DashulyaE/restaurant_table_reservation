@@ -101,15 +101,18 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
           set -e
           echo "Starting deployment..."
-          cd ${{ secrets.DEPLOY_DIR }}
           
-          # Добавляем папку в список безопасных
-          git config --global --add safe.directory ${{ secrets.DEPLOY_DIR }}
+          # Выводим путь для проверки
+          echo "Переход в директорию: '${{ secrets.DEPLOY_DIR }}'"
           
-          # Проверяем, есть ли репозиторий
+          # Переходим в директорию
+          cd "${{ secrets.DEPLOY_DIR }}"
+          
+          # Остальной скрипт...
+          # Например, проверка и клонирование репозитория
           if [ ! -d ".git" ]; then
-            # Клонируем репозиторий, если его нет
-            git clone https://github.com/DashulyaE/restaurant_table_reservation.git .  # точка означает текущая папка
+            echo "Клонируем репозиторий..."
+            git clone https://github.com/DashulyaE/restaurant_table_reservation.git .
           fi
           
           # Обновляем проект
@@ -134,14 +137,12 @@ jobs:
           
           # Устанавливаем права
           sudo chmod 600 .env
-          sudo chmod -R u+rwX ${{ secrets.DEPLOY_DIR }}
-          
-          # Настраиваем git
-          git config --global --add safe.directory ${{ secrets.DEPLOY_DIR }}
+          sudo chmod -R u+rwX "${{ secrets.DEPLOY_DIR }}"
           
           # Обновляем проект
-          git pull
+          git fetch
+          git pull origin $(git rev-parse --abbrev-ref HEAD)
           
-          # Запускаем контейнеры на сервере
+          # Запускаем контейнеры
           docker compose --env-file .env up -d
           EOF
