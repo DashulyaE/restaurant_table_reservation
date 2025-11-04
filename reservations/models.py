@@ -1,0 +1,163 @@
+from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
+
+from users.models import User
+
+
+class Restaurant(models.Model):
+    """Модель класса ресторан"""
+
+    name = models.CharField(max_length=255, verbose_name="Название ресторана", help_text="Введите название ресторана")
+    address = models.CharField(max_length=500, verbose_name="Адрес ресторана", help_text="Введите адрес ресторана")
+    contact_info = PhoneNumberField(region="RU", verbose_name="Телефон ресторана")
+    description = models.TextField(
+        blank=True, null=True, verbose_name="Описание ресторана", help_text="Внесите краткое описание ресторана"
+    )
+    photo = models.ImageField(
+        upload_to="restaurant/photo", verbose_name="Фото ресторана", help_text="Загрузите фото ресторана"
+    )
+    seating_plan_image = models.ImageField(
+        upload_to="seating_plans/photo",
+        verbose_name="План рассадки",
+        help_text="Загрузите план рассадки",
+        default="seating_plans/photo/default.jpg",
+    )
+    owner = models.ForeignKey(
+        User,
+        verbose_name="Владелец",
+        help_text="Укажите владельца",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    manager = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="managed_restaurants",
+        verbose_name="Менеджер",
+    )
+
+    class Meta:
+        verbose_name = "Ресторан"
+        verbose_name_plural = "Рестораны"
+        ordering = ["name"]
+        permissions = [
+            ("can_edit_restaurant", "Может редактировать свой ресторан"),
+            ("can_delete_restaurant", "Может удалить свой ресторан"),
+            ("can_add_restaurant", "Может создать ресторан"),
+        ]
+
+    def __str__(self):
+        return self.name
+
+
+class Table(models.Model):
+    """Модель класса стол"""
+
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name="tables",
+        verbose_name="Ресторан",
+        help_text="Выбрать ресторан",
+    )
+    number = models.CharField(max_length=50, verbose_name="Номер стола", help_text="Укажите номер стола")
+    size = models.PositiveIntegerField(verbose_name="Кол-во мест", help_text="Количество мест за столиком")
+    owner = models.ForeignKey(
+        User,
+        verbose_name="Владелец",
+        help_text="Укажите владельца",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+
+    class Meta:
+        verbose_name = "Стол"
+        verbose_name_plural = "Столы"
+        ordering = ["restaurant", "size"]
+        permissions = [
+            ("can_view_table", "Может просматривать список своих столов"),
+            ("can_delete_table", "Может удалить свой стол"),
+            ("can_add_table", "Может создать стол"),
+            ("can_edit_table", "Может редактировать свой стол"),
+        ]
+
+    def __str__(self):
+        return f"Стол {self.number} в {self.restaurant.name} на {self.size} человек"
+
+
+class Reservation(models.Model):
+    """Модель класса резерв"""
+
+    restaurant = models.ForeignKey(
+        Restaurant, on_delete=models.CASCADE, verbose_name="Ресторан", related_name="reservations"
+    )
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, verbose_name="Номер стола", related_name="reservations")
+    customer_name = models.CharField(max_length=255, verbose_name="Имя клиента")
+    telephone = PhoneNumberField(region="RU", verbose_name="Телефон клиента")
+    number_of_guests = models.PositiveIntegerField(help_text="Количество гостей", verbose_name="Количество гостей")
+    reservation_date = models.DateField(help_text="Дата брони", verbose_name="Дата брони", null=True, blank=True)
+    reservation_start = models.TimeField(
+        help_text="Время начала брони", verbose_name="Время начала брони", null=True, blank=True
+    )
+    reservation_and = models.TimeField(
+        help_text="Время окончания брони", verbose_name="Время окончания брони", null=True, blank=True
+    )
+    original_reservation_date = models.DateField(
+        verbose_name="Дата бронирования (оригинальная)", null=True, blank=True
+    )
+    original_reservation_start = models.TimeField(verbose_name="Время начала (оригинальное)", null=True, blank=True)
+    original_reservation_and = models.TimeField(verbose_name="Время окончания (оригинальное)", null=True, blank=True)
+    status_choices = [
+        ("confirmed", "Подтверждено"),
+        ("cancelled", "Отменено"),
+        ("pending", "В ожидании"),
+    ]
+    status = models.CharField(
+        max_length=20, choices=status_choices, default="pending", help_text="Статус брони", verbose_name="Статус брони"
+    )
+    owner = models.ForeignKey(
+        User,
+        verbose_name="Владелец",
+        help_text="Укажите владельца",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    note = models.TextField(
+        verbose_name="Примечание",
+        help_text="Дополнительная информация о бронировании",
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = "Бронь>"
+        verbose_name_plural = "Брони"
+        ordering = ["reservation_date", "reservation_start"]
+        permissions = [
+            ("can_change_reservation", "Может редактировать бронь"),
+            ("can_view_reservations", "Может просматривать брони своего ресторана"),
+            ("can_delete_reservations", "Может удалить бронь"),
+        ]
+
+    def __str__(self):
+        return f"Резервирование на имя {self.customer_name} стола {self.reservation_date}"
+
+    def save(self, *args, **kwargs):
+        if self.status == "cancelled":
+            # сохраняем текущие значения в "оригинальные"
+            if not self.original_reservation_date:
+                self.original_reservation_date = self.reservation_date
+            if not self.original_reservation_start:
+                self.original_reservation_start = self.reservation_start
+            if not self.original_reservation_and:
+                self.original_reservation_and = self.reservation_and
+            # обнуляем основные поля
+            self.reservation_date = None
+            self.reservation_start = None
+            self.reservation_and = None
+        super().save(*args, **kwargs)

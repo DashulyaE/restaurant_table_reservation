@@ -1,0 +1,38 @@
+{% extends 'reservations/base.html' %}
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+  <div style="width: 400px;">
+    <div class="card-header">
+      <h4 class="my-0 font-weight-normal">
+          {% if object %}
+          Редактируйте стол
+          {% else %}
+          Создайте стол
+          {% endif %}
+      </h4>
+    </div>
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="invalid-feedback d-block">
+              {{ field.errors|striptags }}
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">
+        {% if object %}
+        Сохранить
+        {% else %}
+        Создать
+        {% endif %}
+      </button>
+      <a href="{% url 'reservations:table_list' %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Назад</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

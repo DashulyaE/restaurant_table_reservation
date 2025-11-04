@@ -1,0 +1,11 @@
+{% extends 'reservations/base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2>Удалить стол </h2>
+  <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate><p class="card-text mb-auto">Действительно хотите удалить {{ object.name }}?</p>
+    {% csrf_token %}
+    <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Удалить</button>
+    <a class="btn btn-lg btn-block btn-outline-primary" href="{% url 'reservations:table_list' %}" role="button">Отмена</a>
+  </form>
+</div>
+{% endblock %}

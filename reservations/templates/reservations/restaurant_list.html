@@ -1,0 +1,44 @@
+{% extends 'reservations/base.html' %}
+{% block content %}
+<div class="mb-4 d-flex justify-content-end">
+  {% if user.is_authenticated and is_owner %}
+    <a href="{% url 'reservations:restaurant_create' %}" class="btn btn-success fs-5">Добавить ресторан</a>
+  {% endif %}
+</div>
+<div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+  {% for restaurant in object_list %}
+  <div class="col d-flex align-items-stretch">
+    <div class="card mb-4 rounded-3 shadow-sm w-100 d-flex flex-column">
+      <div class="card-header py-3">
+        <h4 class="my-0 fw-normal fs-3">{{restaurant.name}}</h4>
+      </div>
+      {% if restaurant.photo %}
+        <img src="{{ restaurant.photo.url }}" class="card-img-top" alt="{{ restaurant.name }}">
+      {% endif %}
+      <div class="card-body d-flex flex-column">
+        <h1 class="card-title pricing-card-title"><small class="text-body-secondary fw-light fs-5">Адрес: {{restaurant.address}}</small></h1>
+        <ul class="list-unstyled mt-3 mb-4 flex-fill">
+          <li>{{restaurant.description|truncatechars:100}}</li>
+        </ul>
+        <ul>
+          <div class="d-flex gap-2">
+            <a href="{% url 'reservations:restaurant_detail' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Узнать о ресторане</a>
+            {% if user.is_authenticated %}
+              <a href="{% url 'reservations:reservation_create' %}?restaurant={{ restaurant.pk }}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Зарезервировать</a>
+            {% endif %}
+          </div>
+        </ul>
+        <ul>
+          <div class="d-flex gap-2">
+            {% if user.is_authenticated and is_owner %}
+              <a href="{% url 'reservations:restaurant_update' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Редактировать</a>
+              <a href="{% url 'reservations:restaurant_delete' restaurant.pk %}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Удалить</a>
+            {% endif %}
+          </div>
+        </ul>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

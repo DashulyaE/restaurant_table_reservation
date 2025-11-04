@@ -1,0 +1,133 @@
+{% extends 'reservations/base.html' %}
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+  <div style="width: 400px;">
+    <div class="card-header">
+      <h3>
+        {% if show_restaurant_selection %}
+          Выберите ресторан
+        {% else %}
+          {% if object %}
+            Редактировать резерв
+          {% else %}
+            {% if restaurant_name %}
+              Создать резерв столика в ресторане "{{ restaurant_name }}"
+            {% else %}
+              Создать резерв
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      </h3>
+    </div>
+
+    <!-- Форма для выбора параметров (ресторан, дата, время) -->
+    <form method="get" class="mb-3">
+      <div class="border p-3 mb-3">
+        <h5>Выберите параметры для фильтрации столов</h5>
+        <div class="mb-3">
+          <label for="id_restaurant" class="form-label">Ресторан</label>
+          <select name="restaurant" id="id_restaurant" class="form-control">
+            <option value="">Выберите ресторан</option>
+            {% for restaurant in restaurants %}
+              <option value="{{ restaurant.id }}"
+                {% if request.GET.restaurant == restaurant.id|stringformat:"s" %} selected {% endif %}>
+                {{ restaurant.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="id_reservation_date" class="form-label">Дата</label>
+          <select name="reservation_date" id="id_reservation_date" class="form-control">
+            {% for date in date_list %}
+              <option value="{{ date }}" {% if request.GET.reservation_date == date %} selected {% endif %}>{{ date }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="id_reservation_start" class="form-label">Время начала</label>
+          <select name="reservation_start" id="id_reservation_start" class="form-control">
+            {% for time in time_slots %}
+              <option value="{{ time }}" {% if request.GET.reservation_start == time %} selected {% endif %}>{{ time }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="id_reservation_and" class="form-label">Время окончания</label>
+          <select name="reservation_and" id="id_reservation_and" class="form-control">
+            {% for time in time_slots %}
+              <option value="{{ time }}" {% if request.GET.reservation_and == time %} selected {% endif %}>{{ time }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">Обновить список столов</button>
+      </div>
+    </form>
+
+    <!-- Основная форма для резервирования -->
+    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+      {% csrf_token %}
+
+      <!-- Поля для даты и времени -->
+      <div class="mb-3">
+        <label for="id_reservation_date" class="form-label">Дата</label>
+        {{ form.reservation_date }}
+      </div>
+      <div class="mb-3">
+        <label for="id_reservation_start" class="form-label">Время начала</label>
+        {{ form.reservation_start }}
+      </div>
+      <div class="mb-3">
+        <label for="id_reservation_and" class="form-label">Время окончания</label>
+        {{ form.reservation_and }}
+      </div>
+
+      <!-- Поле для выбора ресторана (автоматически выбран) -->
+      <div class="mb-3">
+        <label for="{{ form.restaurant.id_for_label }}" class="form-label">Ресторан</label>
+        {{ form.restaurant }}
+        {% if form.restaurant.errors %}
+          <div class="invalid-feedback d-block">{{ form.restaurant.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Поле для выбора столов (фильтруется по выбранным параметрам) -->
+      <div class="mb-3">
+        <label for="{{ form.table.id_for_label }}" class="form-label">Стол</label>
+        {{ form.table }}
+        {% if form.table.errors %}
+          <div class="invalid-feedback d-block">{{ form.table.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Остальные поля формы -->
+      {% for field in form %}
+        {% if field.name not in 'reservation_date reservation_start reservation_and table' and field.name != 'restaurant' %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>
+          {% endif %}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        {{ form.errors }}
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary">
+        {% if object %}
+        Сохранить
+        {% else %}
+        Создать
+        {% endif %}
+      </button>
+      <a href="{{ back_url }}" class="flex-fill btn btn-lg btn-outline-primary text-nowrap fs-6">Назад</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

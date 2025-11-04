@@ -1,0 +1,26 @@
+from django.core.management.base import BaseCommand
+from django.contrib.auth.models import Group, Permission
+
+
+class Command(BaseCommand):
+    help = "Назначает права группе manager"
+
+    def handle(self, *args, **kwargs):
+        group_name = "manager"
+        permissions_codenames = [
+            "can_view_table",
+            "can_change_reservation",
+            "can_view_reservations",
+            "can_delete_reservations",
+        ]
+
+        group, created = Group.objects.get_or_create(name=group_name)
+
+        for codename in permissions_codenames:
+            try:
+                permission = Permission.objects.get(codename=codename)
+                group.permissions.add(permission)
+            except Permission.DoesNotExist:
+                self.stdout.write(self.style.ERROR(f'Право с кодом "{codename}" не найдено.'))
+
+        self.stdout.write(self.style.SUCCESS(f'Права успешно назначены группе "{group_name}".'))

@@ -1,0 +1,30 @@
+{% extends 'reservations/base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Контакты сервиса "РезервСтолик"</h1>
+    <p>Если у вас есть вопросы, предложения или нужна помощь — свяжитесь с нами:</p>
+    <ul class="list-unstyled mb-4">
+        <li><strong>Телефон:</strong> +7 (495) 123-45-67</li>
+        <li><strong>Электронная почта:</strong> support@rezervstolik.ru</li>
+        <li><strong>Адрес офиса:</strong> г. Москва, ул. Ленина, д. 1</li>
+    </ul>
+    <h2 class="mb-3">Наши соцсети</h2>
+    <div class="d-flex gap-3 mb-4">
+        <!-- ВКонтакте -->
+        <a href="https://vk.com/rezervstolik" target="_blank" class="btn btn-outline-primary btn-lg" aria-label="ВКонтакте">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-vk" viewBox="0 0 24 24">
+            <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm4.5 17.25c-.75 0-1.5-.75-1.5-1.5V8.25c0-.75.75-1.5 1.5-1.5s1.5.75 1.5 1.5v7.5c0 .75-.75 1.5-1.5 1.5zm-9 0c-.75 0-1.5-.75-1.5-1.5V8.25c0-.75.75-1.5 1.5-1.5s1.5.75 1.5 1.5v7.5c0 .75-.75 1.5-1.5 1.5z"/>
+          </svg>
+        </a>
+        <!-- Телеграм -->
+        <a href="https://t.me/rezervstolik" target="_blank" class="btn btn-outline-primary btn-lg" aria-label="Телеграм">
+            <i class="bi bi-telegram"></i>
+        </a>
+    </div>
+    <!-- Карта -->
+    <iframe
+        src="https://www.google.com/maps/embed?pb=..."
+        width="100%" height="400" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+</div>
+{% endblock %}
